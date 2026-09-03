@@ -7,26 +7,54 @@
 <title>Charlie Launch Intelligence</title>
 
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
 <header class="hero">
-    <h1>🚀 Charlie Launch Intelligence</h1>
-    <p>
-        Sistema privado de inteligencia para análisis y detección 
-        de oportunidades en memecoins.
-    </p>
+
+<h1>🚀 Charlie Launch Intelligence</h1>
+
+<p>
+Sistema privado de inteligencia para análisis y detección de oportunidades en memecoins.
+</p>
+
 </header>
 
 
-<section class="panel">
+<section class="dashboard">
+
+
+<div class="search">
+
+<input id="tickerInput" placeholder="Ingrese ticker ejemplo: PEPE">
+
+<button onclick="analizarNuevoToken()">
+Analizar Token
+</button>
+
+<button onclick="actualizarRanking()">
+Actualizar Ranking
+</button>
+
+</div>
+
 
 <h2>Ranking de oportunidades</h2>
 
+
 <div id="resultado"></div>
 
+
 </section>
+
+
+<footer>
+
+Charlie Launch Intelligence © 2026
+
+</footer>
 
 
 <script src="app.js"></script>
