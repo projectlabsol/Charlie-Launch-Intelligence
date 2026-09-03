@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.pumpfun_scanner import PumpFunScanner
+from backend.scanners.pumpfun_scanner import PumpFunScanner
 
 
 app = FastAPI(
