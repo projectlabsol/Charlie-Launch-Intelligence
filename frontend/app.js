@@ -20,7 +20,7 @@ const tokens = [
 ];
 
 
-function analizarToken(token) {
+function analizarToken(token){
 
     let score =
         token.meta * 0.30 +
@@ -29,11 +29,15 @@ function analizarToken(token) {
         token.viralidad * 0.15 +
         token.seguridad * 0.10;
 
+
     return {
         ...token,
         score: Math.round(score)
     };
+
 }
+
+
 
 function iniciarAnalisis(){
 
@@ -41,48 +45,34 @@ function iniciarAnalisis(){
 
     resultados.sort((a,b)=> b.score - a.score);
 
-    const contenedor = document.getElementById("resultado");
-
-    contenedor.innerHTML = `
-        <h2>📊 Análisis Charlie Intelligence</h2>
-
-        ${resultados.map(token => `
-            <div class="card">
-
-                <h3>${token.nombre}</h3>
-
-                <p>${token.ticker}</p>
-
-                <strong>Score: ${token.score}/100</strong>
-
-                <p>Meta: ${token.meta}</p>
-                <p>Volumen: ${token.volumen}</p>
-                <p>Comunidad: ${token.comunidad}</p>
-                <p>Viralidad: ${token.viralidad}</p>
-                <p>Seguridad: ${token.seguridad}</p>
-
-            </div>
-
-        `).join("")}
-    `;
-}
-
-iniciarAnalisis();
-function iniciarAnalisis(){
-
-    let resultados = tokens.map(analizarToken);
-
-    resultados.sort((a,b)=> b.score - a.score);
 
     document.getElementById("resultado").innerHTML =
-    resultados.map(token => `
+    resultados.map(token =>
+
+        `
         <div class="card">
+
             <h2>${token.nombre}</h2>
+
             <p>${token.ticker}</p>
-            <strong>Score: ${token.score}/100</strong>
+
+            <strong>
+            Score: ${token.score}/100
+            </strong>
+
+            <p>Meta: ${token.meta}</p>
+            <p>Volumen: ${token.volumen}</p>
+            <p>Comunidad: ${token.comunidad}</p>
+            <p>Viralidad: ${token.viralidad}</p>
+            <p>Seguridad: ${token.seguridad}</p>
+
         </div>
-    `).join("");
+        `
+
+    ).join("");
 
 }
+
+
 
 window.onload = iniciarAnalisis;
