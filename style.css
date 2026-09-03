@@ -1,20 +1,17 @@
 *{
-box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 
 body{
 
-margin:0;
-padding:0;
+    margin:0;
+    padding:0;
 
-background:#050816;
+    background:#050816;
+    color:white;
 
-color:white;
-
-font-family:
-Arial,
-sans-serif;
+    font-family:Arial, sans-serif;
 
 }
 
@@ -22,118 +19,43 @@ sans-serif;
 
 .hero{
 
-text-align:center;
+    text-align:center;
 
-padding:45px;
+    padding:50px;
 
-border-bottom:
-1px solid #1e293b;
+    border-bottom:1px solid #00ff99;
 
 }
-
 
 
 .hero h1{
 
-font-size:42px;
+    color:#00ff99;
 
-color:#00ff99;
+    font-size:45px;
 
 }
-
 
 
 .hero p{
 
-color:#94a3b8;
-
-font-size:18px;
+    font-size:18px;
 
 }
 
 
 
-.controls{
+.panel{
 
-width:90%;
-
-max-width:1200px;
-
-margin:30px auto;
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(180px,1fr));
-
-gap:15px;
+    padding:40px;
 
 }
 
 
 
-.controls input{
+.panel h2{
 
-background:#111827;
-
-border:1px solid #334155;
-
-color:white;
-
-padding:14px;
-
-border-radius:10px;
-
-}
-
-
-
-.controls button{
-
-background:#00ff99;
-
-border:none;
-
-border-radius:10px;
-
-font-weight:bold;
-
-cursor:pointer;
-
-}
-
-
-
-.dashboard{
-
-width:90%;
-
-max-width:1200px;
-
-margin:auto;
-
-}
-
-
-
-.dashboard h2{
-
-text-align:center;
-
-color:#38bdf8;
-
-}
-
-
-
-#resultado{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(320px,1fr));
-
-gap:25px;
+    color:#00ff99;
 
 }
 
@@ -141,13 +63,15 @@ gap:25px;
 
 .card{
 
-background:#111827;
+    background:#101827;
 
-border:1px solid #334155;
+    border:1px solid #00ff99;
 
-border-radius:20px;
+    border-radius:15px;
 
-padding:25px;
+    padding:25px;
+
+    margin-bottom:20px;
 
 }
 
@@ -155,9 +79,7 @@ padding:25px;
 
 .card h3{
 
-color:#00ff99;
-
-font-size:26px;
+    color:#00ff99;
 
 }
 
@@ -165,77 +87,18 @@ font-size:26px;
 
 .score{
 
-font-size:32px;
+    font-size:22px;
 
-font-weight:bold;
-
-color:#38bdf8;
+    font-weight:bold;
 
 }
 
 
 
-.estado{
+.badge{
 
-padding:8px;
+    color:#00ff99;
 
-border-radius:8px;
-
-display:inline-block;
-
-margin:10px 0;
-
-font-weight:bold;
+    font-weight:bold;
 
 }
-
-
-
-.alta{
-
-background:#065f46;
-
-}
-
-
-
-.media{
-
-background:#854d0e;
-
-}
-
-
-
-.riesgo{
-
-background:#991b1b;
-
-}
-
-
-
-.barra{
-
-height:12px;
-
-background:#1e293b;
-
-border-radius:20px;
-
-overflow:hidden;
-
-margin-bottom:12px;
-
-}
-
-
-
-.barra div{
-
-height:100%;
-
-background:#00ff99;
-
-}
-
