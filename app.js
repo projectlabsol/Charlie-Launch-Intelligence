@@ -1,4 +1,4 @@
-const tokens = [
+let tokens=[
 
 {
 nombre:"Future AI Meme",
@@ -21,56 +21,94 @@ viralidad:85,
 seguridad:84
 }
 
-
 ];
 
 
 
-function analizarToken(token){
+function calcularScore(token){
 
-let score =
+return Math.round(
 
 (token.meta*0.30)+
 (token.volumen*0.25)+
 (token.comunidad*0.20)+
 (token.viralidad*0.15)+
-(token.seguridad*0.10);
+(token.seguridad*0.10)
 
-
-return {
-
-...token,
-
-score:Math.round(score)
-
-};
+);
 
 }
 
 
 
-let resultados = tokens.map(analizarToken);
+function nivel(score){
+
+if(score>=85){
+
+return "high";
+
+}
+
+if(score>=70){
+
+return "medium";
+
+}
+
+return "low";
+
+}
 
 
 
-resultados.sort((a,b)=>b.score-a.score);
+function mostrar(){
+
+let ranking=tokens.map(t=>{
+
+return{
+
+...t,
+
+score:calcularScore(t)
+
+}
+
+});
+
+
+ranking.sort((a,b)=>b.score-a.score);
 
 
 
-document.getElementById("resultado").innerHTML =
+document.getElementById("resultado").innerHTML=
 
-resultados.map(token=>`
+
+ranking.map(token=>`
 
 <div class="card">
 
+
 <h3>${token.nombre}</h3>
 
-<p class="badge">${token.ticker}</p>
+
+<p>${token.ticker}</p>
 
 
 <p class="score">
 Score: ${token.score}/100
 </p>
+
+
+<p class="${nivel(token.score)}">
+
+${token.score>=85?"🟢 Alta oportunidad":
+token.score>=70?"🟡 Revisar":
+"🔴 Riesgo"}
+
+</p>
+
+
+<hr>
 
 
 <p>Meta: ${token.meta}</p>
@@ -88,3 +126,61 @@ Score: ${token.score}/100
 
 
 `).join("");
+
+}
+
+
+
+
+function analizarNuevoToken(){
+
+let ticker=document
+.getElementById("tickerInput")
+.value;
+
+
+if(!ticker){
+
+alert("Ingrese un ticker");
+
+return;
+
+}
+
+
+
+tokens.push({
+
+nombre:"Nuevo Meme Detectado",
+
+ticker:"$"+ticker.toUpperCase(),
+
+meta:Math.floor(Math.random()*30)+70,
+
+volumen:Math.floor(Math.random()*30)+70,
+
+comunidad:Math.floor(Math.random()*30)+70,
+
+viralidad:Math.floor(Math.random()*30)+70,
+
+seguridad:Math.floor(Math.random()*30)+70
+
+});
+
+
+mostrar();
+
+}
+
+
+
+
+function actualizarRanking(){
+
+mostrar();
+
+}
+
+
+
+mostrar();
