@@ -3,40 +3,26 @@ const API_URL = "https://charlie-launch-intelligence.onrender.com";
 
 function analizarToken(){
 
-const ticker = document.getElementById("ticker").value;
+    const ticker = document.getElementById("ticker").value;
 
+    if(!ticker){
+        alert("Ingrese un ticker");
+        return;
+    }
 
-if(!ticker){
+    fetch(`${API_URL}/analizar/${ticker.toUpperCase()}`)
+    .then(response => response.json())
+    .then(data => {
 
-alert("Ingrese un ticker");
+        mostrarResultado(data);
 
-return;
+    })
+    .catch(error => {
 
-}
+        console.log(error);
+        alert("No se pudo conectar con el motor de análisis");
 
-
-fetch(`${API_URL}/analizar/${ticker.toUpperCase()}`)
-
-.then(response=>response.json())
-
-.then(data=>{
-
-
-mostrarResultado(data);
-
-
-})
-
-.catch(error=>{
-
-
-console.log(error);
-
-alert("No se pudo conectar con el motor de análisis");
-
-
-});
-
+    });
 
 }
 
@@ -44,51 +30,33 @@ alert("No se pudo conectar con el motor de análisis");
 
 function mostrarResultado(data){
 
+    const resultado = document.getElementById("resultado");
 
-let resultado = document.getElementById("resultado");
+    resultado.innerHTML = `
 
+    <div class="card">
 
-resultado.innerHTML = `
+        <h3>${data.nombre || "Token analizado"}</h3>
 
+        <p><b>Ticker:</b> ${data.ticker}</p>
 
-<div class="card">
+        <h2>Score: ${data.score}/100</h2>
 
+        <h3>${estadoScore(data.score)}</h3>
 
-<h3>${data.nombre || "Token analizado"}</h3>
+        <hr>
 
+        <p>Volumen: ${data.volumen}</p>
 
-<p>${data.ticker}</p>
+        <p>Comunidad: ${data.comunidad}</p>
 
+        <p>Viralidad: ${data.viralidad}</p>
 
-<h2>
-Score: ${data.score}/100
-</h2>
+        <p>Seguridad: ${data.seguridad}</p>
 
+    </div>
 
-<h3>
-${estadoScore(data.score)}
-</h3>
-
-
-<hr>
-
-
-<p>Volumen: ${data.volumen}</p>
-
-<p>Comunidad: ${data.comunidad}</p>
-
-<p>Viralidad: ${data.viralidad}</p>
-
-<p>Seguridad: ${data.seguridad}</p>
-
-
-
-</div>
-
-
-`;
-
-
+    `;
 
 }
 
@@ -96,87 +64,155 @@ ${estadoScore(data.score)}
 
 function estadoScore(score){
 
+    if(score >= 85){
 
-if(score>=85){
+        return "🟢 Alta oportunidad";
 
-return "🟢 Alta oportunidad";
-
-}
-
-
-if(score>=70){
-
-return "🟡 Analizar más";
-
-}
+    }
 
 
-return "🔴 No recomendado";
+    if(score >= 70){
 
+        return "🟡 Analizar más";
+
+    }
+
+
+    return "🔴 No recomendado";
 
 }
 
+
+
+
+function actualizarRanking(){
+
+    fetch(`${API_URL}/ranking`)
+    .then(response => response.json())
+    .then(data => {
+
+
+        const ranking = document.getElementById("ranking");
+
+
+        ranking.innerHTML = `
+
+        <div class="card">
+
+            <h2>Ranking de oportunidades</h2>
+
+            ${data.map(token => `
+
+                <div>
+
+                    <h3>${token.nombre}</h3>
+
+                    <p>
+                    ${token.ticker}
+                    </p>
+
+                    <p>
+                    Score: ${token.score}/100
+                    </p>
+
+                    <hr>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+        `;
+
+
+    })
+    .catch(error=>{
+
+        console.log(error);
+
+        alert("Error cargando ranking");
+
+    });
+
+}
 
 
 
 
 function recomendarLanzamiento(){
 
-    fetch("https://charlie-launch-intelligence.onrender.com/recomendar")
-    .then(res => res.json())
-    .then(datos => {
+    fetch(`${API_URL}/recomendar`)
+    .then(response => response.json())
+    .then(data => {
 
-        let mensaje = "";
 
-        if(datos.recomendaciones.length === 0){
+        const recomendacion = document.getElementById("recomendacion");
 
-            mensaje = "❌ No hay lanzamientos recomendados";
 
-        } else {
+        if(data.recomendaciones.length === 0){
 
-            datos.recomendaciones.forEach(token => {
+            recomendacion.innerHTML = `
 
-                mensaje += `
-🚀 ${token.token}
+            <div class="card">
 
-${token.ticker}
+            <h2>❌ No hay lanzamientos recomendados</h2>
 
-DECISIÓN:
-${token.decision}
+            </div>
 
-SCORE:
-${token.score}/100
+            `;
 
-------------------
-`;
-
-            });
+            return;
 
         }
 
-        document.getElementById("recomendacion").innerHTML = `
-        <div class="recomendacion verde">
-            <h2>${mensaje}</h2>
-            <p>Evaluación basada en inteligencia de mercado.</p>
-        </div>
-        `;
+
+
+        let html = "";
+
+
+        data.recomendaciones.forEach(token=>{
+
+
+            html += `
+
+            <div class="card">
+
+                <h2>🚀 ${token.token}</h2>
+
+                <p>
+                Ticker: ${token.ticker}
+                </p>
+
+                <h3>
+                ${token.decision}
+                </h3>
+
+                <p>
+                Score: ${token.score}/100
+                </p>
+
+            </div>
+
+            `;
+
+
+        });
+
+
+
+        recomendacion.innerHTML = html;
+
+
 
     })
-    .catch(error => {
+    .catch(error=>{
+
+        console.log(error);
 
         alert("Error conectando con el servidor");
-        console.log(error);
 
     });
 
-}
-
-}
-
-
-
-function actualizarRanking(){
-
-location.reload();
 
 }
