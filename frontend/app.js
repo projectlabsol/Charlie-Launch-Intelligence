@@ -35,7 +35,39 @@ function analizarToken(token) {
     };
 }
 
+function iniciarAnalisis(){
 
+    let resultados = tokens.map(analizarToken);
+
+    resultados.sort((a,b)=> b.score - a.score);
+
+    const contenedor = document.getElementById("resultado");
+
+    contenedor.innerHTML = `
+        <h2>📊 Análisis Charlie Intelligence</h2>
+
+        ${resultados.map(token => `
+            <div class="card">
+
+                <h3>${token.nombre}</h3>
+
+                <p>${token.ticker}</p>
+
+                <strong>Score: ${token.score}/100</strong>
+
+                <p>Meta: ${token.meta}</p>
+                <p>Volumen: ${token.volumen}</p>
+                <p>Comunidad: ${token.comunidad}</p>
+                <p>Viralidad: ${token.viralidad}</p>
+                <p>Seguridad: ${token.seguridad}</p>
+
+            </div>
+
+        `).join("")}
+    `;
+}
+
+iniciarAnalisis();
 function iniciarAnalisis(){
 
     let resultados = tokens.map(analizarToken);
