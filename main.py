@@ -1,22 +1,40 @@
-from engine.charlie_engine import CharlieEngine
-from scanners.pumpfun_scanner import PumpFunScanner
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from backend.pumpfun_scanner import PumpFunScanner
+
+
+app = FastAPI(
+    title="Charlie Launch Intelligence API"
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 scanner = PumpFunScanner()
-engine = CharlieEngine()
 
 
-tokens = scanner.escanear()
+@app.get("/")
+def inicio():
+    return {
+        "estado":"Charlie Launch Intelligence activo"
+    }
 
 
-for token in tokens:
-    token["seguridad"] = 75
-    token["comunidad"] = token.get("comunidad", 0)
+@app.get("/analizar/{ticker}")
+def analizar_token(ticker:str):
+
+    resultado = scanner.analizar(ticker)
+
+    return resultado
 
 
-resultado = engine.recomendar(tokens)
+@app.get("/ranking")
+def ranking():
 
-
-print("=== CHARLIE LAUNCH INTELLIGENCE ===")
-print("TOKEN RECOMENDADO:")
-print(resultado)
+    return scanner.escanear()
