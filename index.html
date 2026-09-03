@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,7 +12,9 @@
 
 </head>
 
+
 <body>
+
 
 <header class="hero">
 
@@ -23,22 +27,39 @@ Sistema privado de inteligencia para análisis y detección de oportunidades en 
 </header>
 
 
+
 <section class="dashboard">
 
 
 <div class="search">
 
-<input id="tickerInput" placeholder="Ingrese ticker ejemplo: PEPE">
+
+<input 
+id="tickerInput"
+placeholder="Ingrese ticker ejemplo: PEPE">
+
 
 <button onclick="analizarNuevoToken()">
 Analizar Token
 </button>
 
+
 <button onclick="actualizarRanking()">
 Actualizar Ranking
 </button>
 
+
+<button onclick="recomendarLanzamiento()">
+🚀 Recomendar Lanzamiento
+</button>
+
+
 </div>
+
+
+
+<div id="recomendacion"></div>
+
 
 
 <h2>Ranking de oportunidades</h2>
@@ -50,6 +71,7 @@ Actualizar Ranking
 </section>
 
 
+
 <footer>
 
 Charlie Launch Intelligence © 2026
@@ -57,7 +79,10 @@ Charlie Launch Intelligence © 2026
 </footer>
 
 
+
 <script src="app.js"></script>
 
+
 </body>
+
 </html>
