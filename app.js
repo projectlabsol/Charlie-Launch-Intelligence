@@ -1,9 +1,9 @@
-let tokens=[
-
+let tokens = [
 
 {
 nombre:"Future AI Meme",
 ticker:"$FAIM",
+score:90,
 meta:95,
 volumen:90,
 comunidad:85,
@@ -11,11 +11,10 @@ viralidad:92,
 seguridad:80
 },
 
-
-
 {
 nombre:"Animal Viral",
 ticker:"$ANV",
+score:86,
 meta:88,
 volumen:82,
 comunidad:90,
@@ -23,273 +22,202 @@ viralidad:85,
 seguridad:84
 }
 
-
 ];
 
 
 
+function mostrarTokens(){
 
-function calcularScore(token){
-
-
-return Math.round(
-
-(token.meta*0.30)+
-(token.volumen*0.25)+
-(token.comunidad*0.20)+
-(token.viralidad*0.15)+
-(token.seguridad*0.10)
-
-);
+let html="";
 
 
+tokens.forEach(t=>{
+
+let estado="";
+
+if(t.score>=85){
+estado="🟢 Alta oportunidad";
+}
+else if(t.score>=70){
+estado="🟡 Analizar más";
+}
+else{
+estado="🔴 Riesgo alto";
 }
 
 
-
-
-
-function nivel(score){
-
-
-if(score>=85){
-
-return "high";
-
-}
-
-
-if(score>=70){
-
-return "medium";
-
-}
-
-
-return "low";
-
-
-}
-
-
-
-
-
-function mostrar(){
-
-
-let ranking=tokens.map(t=>({
-
-...t,
-
-score:calcularScore(t)
-
-}));
-
-
-ranking.sort((a,b)=>b.score-a.score);
-
-
-
-document.getElementById("resultado").innerHTML=
-
-
-ranking.map(token=>`
-
+html+=`
 
 <div class="card">
 
+<h3>${t.nombre}</h3>
 
-<h3>${token.nombre}</h3>
+<p>${t.ticker}</p>
 
+<h3>Score: ${t.score}/100</h3>
 
-<p>${token.ticker}</p>
-
-
-<p class="score">
-Score: ${token.score}/100
-</p>
-
-
-<p class="${nivel(token.score)}">
-
-${token.score>=85?"🟢 Alta oportunidad":
-token.score>=70?"🟡 Revisar":
-"🔴 Riesgo"}
-
-</p>
-
+<h4>${estado}</h4>
 
 <hr>
 
+<p>Meta: ${t.meta}</p>
 
-<p>Meta: ${token.meta}</p>
+<p>Volumen: ${t.volumen}</p>
 
-<p>Volumen: ${token.volumen}</p>
+<p>Comunidad: ${t.comunidad}</p>
 
-<p>Comunidad: ${token.comunidad}</p>
+<p>Viralidad: ${t.viralidad}</p>
 
-<p>Viralidad: ${token.viralidad}</p>
-
-<p>Seguridad: ${token.seguridad}</p>
-
+<p>Seguridad: ${t.seguridad}</p>
 
 
 </div>
 
-
-`).join("");
-
-
-
-}
-
-
-
-
-
-function analizarNuevoToken(){
-
-
-let ticker=document.getElementById("tickerInput").value;
-
-
-if(!ticker){
-
-alert("Ingrese un ticker");
-
-return;
-
-}
-
-
-
-tokens.push({
-
-
-nombre:"Nuevo lanzamiento detectado",
-
-ticker:"$"+ticker.toUpperCase(),
-
-
-meta:Math.floor(Math.random()*30)+70,
-
-volumen:Math.floor(Math.random()*30)+70,
-
-comunidad:Math.floor(Math.random()*30)+70,
-
-viralidad:Math.floor(Math.random()*30)+70,
-
-seguridad:Math.floor(Math.random()*30)+70
-
+`;
 
 });
 
 
-mostrar();
+document.getElementById("resultado").innerHTML=html;
 
 
 }
 
 
 
+function analizarToken(){
+
+let ticker=document.getElementById("ticker").value;
+
+
+if(ticker===""){
+alert("Ingrese un ticker");
+return;
+}
+
+
+let nuevo={
+
+nombre:"Nuevo Token "+ticker,
+
+ticker:"$"+ticker.toUpperCase(),
+
+score:88,
+
+meta:90,
+
+volumen:85,
+
+comunidad:86,
+
+viralidad:89,
+
+seguridad:82
+
+};
+
+
+tokens.unshift(nuevo);
+
+
+mostrarTokens();
+
+
+}
 
 
 
 function actualizarRanking(){
 
-mostrar();
+tokens.sort((a,b)=>b.score-a.score);
+
+mostrarTokens();
 
 }
-
-
-
 
 
 
 function recomendarLanzamiento(){
 
 
-
-let mejor=tokens.map(t=>({
-
-nombre:t.nombre,
-
-score:calcularScore(t)
-
-}))
+let ganador=tokens[0];
 
 
-.sort((a,b)=>b.score-a.score)[0];
+let estado="";
+
+let color="";
 
 
+if(ganador.score>=85){
 
-let mensaje;
+estado="🚀 LANZAMIENTO RECOMENDADO";
 
-let clase;
-
-
-
-if(mejor.score>=85){
-
-
-mensaje=
-"🚀 LANZAMIENTO RECOMENDADO<br><br>"+
-mejor.nombre+
-"<br>Score: "+
-mejor.score+
-"/100";
-
-
-clase="recomendado";
-
+color="verde";
 
 }
 
-else if(mejor.score>=70){
+else if(ganador.score>=70){
 
+estado="⚠️ ANALIZAR ANTES DE LANZAR";
 
-mensaje=
-"⚠️ ESPERAR MEJORAS<br><br>"+
-mejor.nombre+
-"<br>Score: "+
-mejor.score+
-"/100";
-
-
-clase="espera";
-
+color="amarillo";
 
 }
 
 else{
 
+estado="❌ NO RECOMENDADO";
 
-mensaje=
-"❌ NO RECOMENDADO<br><br>"+
-mejor.nombre+
-"<br>Score: "+
-mejor.score+
-"/100";
-
-
-clase="no-recomendado";
-
+color="rojo";
 
 }
 
 
 
-
 document.getElementById("recomendacion").innerHTML=
 
-
 `
-<div class="recomendacion ${clase}">
 
-${mensaje}
+<div class="recomendacion ${color}">
+
+
+<h2>${estado}</h2>
+
+
+<h3>${ganador.nombre}</h3>
+
+
+<p>Token: ${ganador.ticker}</p>
+
+
+<p>Score Inteligencia: ${ganador.score}/100</p>
+
+
+<hr>
+
+
+<p>
+Potencial: ${ganador.meta}/100
+</p>
+
+
+<p>
+Comunidad: ${ganador.comunidad}/100
+</p>
+
+
+<p>
+Viralidad: ${ganador.viralidad}/100
+</p>
+
+
+<p>
+Riesgo Seguridad: ${ganador.seguridad}/100
+</p>
+
 
 </div>
+
 `;
 
 
@@ -297,5 +225,4 @@ ${mensaje}
 
 
 
-
-mostrar();
+window.onload=mostrarTokens;
