@@ -122,62 +122,54 @@ return "🔴 No recomendado";
 
 function recomendarLanzamiento(){
 
+    fetch("https://charlie-launch-intelligence.onrender.com/recomendar")
+    .then(res => res.json())
+    .then(datos => {
 
-let cards=document.querySelector(".card");
+        let mensaje = "";
 
+        if(datos.recomendaciones.length === 0){
 
-if(!cards){
+            mensaje = "❌ No hay lanzamientos recomendados";
 
-alert("Primero analiza un token");
+        } else {
 
-return;
+            datos.recomendaciones.forEach(token => {
 
-}
+                mensaje += `
+🚀 ${token.token}
 
+${token.ticker}
 
-let texto=cards.innerText;
+DECISIÓN:
+${token.decision}
 
+SCORE:
+${token.score}/100
 
-let score=parseInt(texto.match(/\d+/)[0]);
-
-
-
-let mensaje="";
-
-
-if(score>=85){
-
-mensaje="🚀 LANZAMIENTO RECOMENDADO";
-
-}
-
-else if(score>=70){
-
-mensaje="⚠️ REVISAR ANTES DEL LANZAMIENTO";
-
-}
-
-else{
-
-mensaje="❌ NO RECOMENDADO";
-
-}
-
-
-
-document.getElementById("recomendacion").innerHTML=`
-
-<div class="recomendacion verde">
-
-<h2>${mensaje}</h2>
-
-<p>Evaluación basada en inteligencia de mercado.</p>
-
-</div>
-
+------------------
 `;
 
+            });
 
+        }
+
+        document.getElementById("recomendacion").innerHTML = `
+        <div class="recomendacion verde">
+            <h2>${mensaje}</h2>
+            <p>Evaluación basada en inteligencia de mercado.</p>
+        </div>
+        `;
+
+    })
+    .catch(error => {
+
+        alert("Error conectando con el servidor");
+        console.log(error);
+
+    });
+
+}
 
 }
 
