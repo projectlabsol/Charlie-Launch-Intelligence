@@ -1,5 +1,6 @@
 let tokens=[
 
+
 {
 nombre:"Future AI Meme",
 ticker:"$FAIM",
@@ -9,6 +10,7 @@ comunidad:85,
 viralidad:92,
 seguridad:80
 },
+
 
 
 {
@@ -21,11 +23,14 @@ viralidad:85,
 seguridad:84
 }
 
+
 ];
 
 
 
+
 function calcularScore(token){
+
 
 return Math.round(
 
@@ -37,11 +42,15 @@ return Math.round(
 
 );
 
+
 }
 
 
 
+
+
 function nivel(score){
+
 
 if(score>=85){
 
@@ -49,31 +58,33 @@ return "high";
 
 }
 
+
 if(score>=70){
 
 return "medium";
 
 }
 
+
 return "low";
 
+
 }
+
+
 
 
 
 function mostrar(){
 
-let ranking=tokens.map(t=>{
 
-return{
+let ranking=tokens.map(t=>({
 
 ...t,
 
 score:calcularScore(t)
 
-}
-
-});
+}));
 
 
 ranking.sort((a,b)=>b.score-a.score);
@@ -84,6 +95,7 @@ document.getElementById("resultado").innerHTML=
 
 
 ranking.map(token=>`
+
 
 <div class="card">
 
@@ -122,21 +134,24 @@ token.score>=70?"🟡 Revisar":
 <p>Seguridad: ${token.seguridad}</p>
 
 
+
 </div>
 
 
 `).join("");
+
+
 
 }
 
 
 
 
+
 function analizarNuevoToken(){
 
-let ticker=document
-.getElementById("tickerInput")
-.value;
+
+let ticker=document.getElementById("tickerInput").value;
 
 
 if(!ticker){
@@ -151,9 +166,11 @@ return;
 
 tokens.push({
 
-nombre:"Nuevo Meme Detectado",
+
+nombre:"Nuevo lanzamiento detectado",
 
 ticker:"$"+ticker.toUpperCase(),
+
 
 meta:Math.floor(Math.random()*30)+70,
 
@@ -165,12 +182,16 @@ viralidad:Math.floor(Math.random()*30)+70,
 
 seguridad:Math.floor(Math.random()*30)+70
 
+
 });
 
 
 mostrar();
 
+
 }
+
+
 
 
 
@@ -180,6 +201,100 @@ function actualizarRanking(){
 mostrar();
 
 }
+
+
+
+
+
+
+function recomendarLanzamiento(){
+
+
+
+let mejor=tokens.map(t=>({
+
+nombre:t.nombre,
+
+score:calcularScore(t)
+
+}))
+
+
+.sort((a,b)=>b.score-a.score)[0];
+
+
+
+let mensaje;
+
+let clase;
+
+
+
+if(mejor.score>=85){
+
+
+mensaje=
+"🚀 LANZAMIENTO RECOMENDADO<br><br>"+
+mejor.nombre+
+"<br>Score: "+
+mejor.score+
+"/100";
+
+
+clase="recomendado";
+
+
+}
+
+else if(mejor.score>=70){
+
+
+mensaje=
+"⚠️ ESPERAR MEJORAS<br><br>"+
+mejor.nombre+
+"<br>Score: "+
+mejor.score+
+"/100";
+
+
+clase="espera";
+
+
+}
+
+else{
+
+
+mensaje=
+"❌ NO RECOMENDADO<br><br>"+
+mejor.nombre+
+"<br>Score: "+
+mejor.score+
+"/100";
+
+
+clase="no-recomendado";
+
+
+}
+
+
+
+
+document.getElementById("recomendacion").innerHTML=
+
+
+`
+<div class="recomendacion ${clase}">
+
+${mensaje}
+
+</div>
+`;
+
+
+}
+
 
 
 
