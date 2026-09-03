@@ -20,7 +20,7 @@ const tokens = [
 ];
 
 
-function analizarToken(token){
+function analizarToken(token) {
 
     let score =
         token.meta * 0.30 +
@@ -29,34 +29,28 @@ function analizarToken(token){
         token.viralidad * 0.15 +
         token.seguridad * 0.10;
 
-
     return {
         ...token,
         score: Math.round(score)
     };
-
 }
 
 
-const resultados = tokens.map(analizarToken);
+function iniciarAnalisis(){
 
+    let resultados = tokens.map(analizarToken);
 
-const ganador = resultados.sort(
-    (a,b)=> b.score - a.score
-)[0];
+    resultados.sort((a,b)=> b.score - a.score);
 
+    document.getElementById("resultado").innerHTML =
+    resultados.map(token => `
+        <div class="card">
+            <h2>${token.nombre}</h2>
+            <p>${token.ticker}</p>
+            <strong>Score: ${token.score}/100</strong>
+        </div>
+    `).join("");
 
-document.getElementById("token").innerHTML =
-`
-<h2>🚀 RECOMENDACIÓN CHARLIE</h2>
+}
 
-<h3>${ganador.nombre} ${ganador.ticker}</h3>
-
-<p>META: ${ganador.meta}</p>
-<p>VOLUMEN: ${ganador.volumen}</p>
-<p>COMUNIDAD: ${ganador.comunidad}</p>
-<p>VIRALIDAD: ${ganador.viralidad}</p>
-
-<h2>Puntuación Charlie: ${ganador.score}/100</h2>
-
-`;
+window.onload = iniciarAnalisis;
