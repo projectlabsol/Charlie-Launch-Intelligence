@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -12,77 +10,53 @@
 
 </head>
 
-
 <body>
-
 
 <header class="hero">
 
 <h1>🚀 Charlie Launch Intelligence</h1>
 
 <p>
-Sistema privado de inteligencia para análisis y detección de oportunidades en memecoins.
+Sistema privado de inteligencia para análisis y detección de oportunidades en memecoins
 </p>
 
 </header>
 
 
+<section class="control">
 
-<section class="dashboard">
+<input id="ticker" placeholder="Ingrese ticker ejemplo: PEPE">
 
-
-<div class="search">
-
-
-<input 
-id="tickerInput"
-placeholder="Ingrese ticker ejemplo: PEPE">
-
-
-<button onclick="analizarNuevoToken()">
+<button onclick="analizarToken()">
 Analizar Token
 </button>
-
 
 <button onclick="actualizarRanking()">
 Actualizar Ranking
 </button>
 
-
 <button onclick="recomendarLanzamiento()">
 🚀 Recomendar Lanzamiento
 </button>
-
-
-</div>
-
-
-
-<div id="recomendacion"></div>
-
-
-
-<h2>Ranking de oportunidades</h2>
-
-
-<div id="resultado"></div>
-
 
 </section>
 
 
 
-<footer>
+<section>
 
-Charlie Launch Intelligence © 2026
+<h2>Ranking de oportunidades</h2>
 
-</footer>
+<div id="resultado"></div>
 
+
+<div id="recomendacion"></div>
+
+
+</section>
 
 
 <script src="app.js"></script>
 
-
 </body>
-
 </html>
