@@ -1,78 +1,104 @@
 body {
     margin: 0;
     padding: 0;
-    background: #07110d;
-    color: #ffffff;
+    background: #050b14;
+    color: white;
     font-family: Arial, sans-serif;
 }
 
 
 header {
-    padding: 30px;
     text-align: center;
-    border-bottom: 1px solid #1cff9b;
+    padding: 40px;
+    border-bottom: 1px solid #1f2937;
 }
 
 
 header h1 {
-    color: #1cff9b;
-    font-size: 38px;
+    font-size: 42px;
+    color: #00ff99;
+    margin-bottom: 10px;
 }
 
 
-.panel {
+header p {
+    font-size: 18px;
+    color: #cbd5e1;
+}
 
-    margin: 25px auto;
-    width: 85%;
-    background: #0d1b16;
-    border: 1px solid #1cff9b;
+
+.dashboard {
+    width: 90%;
+    max-width: 1200px;
+    margin: 40px auto;
+}
+
+
+.dashboard h2 {
+    color: #38bdf8;
+    text-align: center;
+}
+
+
+#resultado {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+    gap: 25px;
+}
+
+
+.card {
+
+    background: #111827;
+    border: 1px solid #334155;
     border-radius: 15px;
     padding: 25px;
 
-}
-
-
-h2 {
-    color: #1cff9b;
-}
-
-
-#status {
-
-    color: #00ff88;
-    font-weight: bold;
+    box-shadow:
+    0 0 20px rgba(0,255,153,0.15);
 
 }
 
 
-table {
+.card h3 {
 
-    width: 100%;
-    border-collapse: collapse;
-
-}
-
-
-th {
-
-    background: #123326;
-    padding: 15px;
+    color:#00ff99;
+    font-size:26px;
 
 }
 
 
-td {
+.score {
 
-    padding: 12px;
-    border-bottom: 1px solid #1c3d30;
+    font-size:30px;
+    font-weight:bold;
+    color:#38bdf8;
 
 }
 
 
-footer {
+.progress {
 
-    text-align:center;
-    padding:30px;
-    color:#888;
+    background:#1e293b;
+    height:10px;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:8px;
+
+}
+
+
+.progress div {
+
+    height:100%;
+    background:#00ff99;
+
+}
+
+
+.label {
+
+    margin-top:15px;
+    color:#cbd5e1;
 
 }
