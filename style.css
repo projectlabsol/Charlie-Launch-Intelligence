@@ -1,61 +1,112 @@
 *{
-    box-sizing:border-box;
+box-sizing:border-box;
 }
 
 
 body{
 
-    margin:0;
-    padding:0;
+margin:0;
+padding:0;
 
-    background:#050816;
-    color:white;
+background:#050816;
 
-    font-family:Arial, sans-serif;
+color:white;
+
+font-family:Arial,sans-serif;
 
 }
 
 
-
 .hero{
 
-    text-align:center;
+text-align:center;
 
-    padding:50px;
+padding:45px;
 
-    border-bottom:1px solid #00ff99;
+border-bottom:1px solid #00ff99;
 
 }
 
 
 .hero h1{
 
-    color:#00ff99;
+font-size:45px;
 
-    font-size:45px;
+color:#00ff99;
 
 }
 
 
 .hero p{
 
-    font-size:18px;
+font-size:18px;
 
 }
 
 
 
-.panel{
+.dashboard{
 
-    padding:40px;
+padding:40px;
+
+}
+
+
+.search{
+
+display:flex;
+
+gap:15px;
+
+margin-bottom:40px;
 
 }
 
 
 
-.panel h2{
+input{
 
-    color:#00ff99;
+padding:15px;
+
+width:300px;
+
+border-radius:10px;
+
+border:none;
+
+}
+
+
+
+button{
+
+padding:15px 25px;
+
+background:#00ff99;
+
+border:none;
+
+border-radius:10px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+
+
+button:hover{
+
+background:white;
+
+}
+
+
+
+h2{
+
+color:#00ff99;
 
 }
 
@@ -63,15 +114,15 @@ body{
 
 .card{
 
-    background:#101827;
+background:#101827;
 
-    border:1px solid #00ff99;
+border:1px solid #00ff99;
 
-    border-radius:15px;
+border-radius:15px;
 
-    padding:25px;
+padding:25px;
 
-    margin-bottom:20px;
+margin:20px 0;
 
 }
 
@@ -79,7 +130,7 @@ body{
 
 .card h3{
 
-    color:#00ff99;
+color:#00ff99;
 
 }
 
@@ -87,18 +138,47 @@ body{
 
 .score{
 
-    font-size:22px;
+font-size:25px;
 
-    font-weight:bold;
+font-weight:bold;
 
 }
 
 
 
-.badge{
+.high{
 
-    color:#00ff99;
+color:#00ff99;
 
-    font-weight:bold;
+font-weight:bold;
+
+}
+
+
+.medium{
+
+color:#ffd700;
+
+font-weight:bold;
+
+}
+
+
+.low{
+
+color:#ff5555;
+
+font-weight:bold;
+
+}
+
+
+footer{
+
+text-align:center;
+
+padding:30px;
+
+opacity:.6;
 
 }
