@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,34 +12,44 @@
 
 </head>
 
+
 <body>
+
 
 <header class="hero">
 
 <h1>🚀 Charlie Launch Intelligence</h1>
 
 <p>
-Sistema privado de inteligencia para análisis y detección de oportunidades en memecoins
+Sistema de análisis inteligente de lanzamiento de tokens
 </p>
 
 </header>
 
 
+
 <section class="control">
 
-<input id="ticker" placeholder="Ingrese ticker ejemplo: PEPE">
+
+<input 
+id="ticker"
+placeholder="Ingrese ticker">
+
 
 <button onclick="analizarToken()">
 Analizar Token
 </button>
 
+
 <button onclick="actualizarRanking()">
 Actualizar Ranking
 </button>
 
+
 <button onclick="recomendarLanzamiento()">
 🚀 Recomendar Lanzamiento
 </button>
+
 
 </section>
 
@@ -45,10 +57,17 @@ Actualizar Ranking
 
 <section>
 
-<h2>Ranking de oportunidades</h2>
+<h2>Resultado</h2>
 
 <div id="resultado"></div>
 
+
+<h2>Ranking</h2>
+
+<div id="ranking"></div>
+
+
+<h2>Recomendación</h2>
 
 <div id="recomendacion"></div>
 
@@ -56,7 +75,10 @@ Actualizar Ranking
 </section>
 
 
+
 <script src="app.js"></script>
 
+
 </body>
+
 </html>
