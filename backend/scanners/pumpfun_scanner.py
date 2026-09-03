@@ -8,40 +8,42 @@ class PumpFunScanner:
 
     def __init__(self):
 
-        self.nombre = "Charlie Launch Intelligence Scanner"
+        self.nombre = "Charlie Launch Intelligence"
 
-        self.api_key = os.getenv("HELIUS_API_KEY")
+        self.helius_key = os.getenv("HELIUS_API_KEY")
 
-        self.base_url = (
+        self.rpc = (
             "https://mainnet.helius-rpc.com/?api-key="
-            + str(self.api_key)
+            + str(self.helius_key)
         )
-
 
 
     def obtener_tokens(self):
 
-        """
-        Obtiene actividad real de Solana usando Helius.
-        """
-
-        if not self.api_key:
-
+        if not self.helius_key:
             return []
+
+
+        # Programa oficial Pump.fun
+        pumpfun_program = (
+            "6EF8rrecthR5Dk7b7K7F6Y7F6D6"
+        )
 
 
         payload = {
 
             "jsonrpc":"2.0",
-            "id":"charlie",
+
+            "id":1,
+
             "method":"getSignaturesForAddress",
+
             "params":[
 
-                # Pump.fun program address
-                "6EF8rrecthR5Dk7b7K7f4m8H5m9k9Q7Z7Y",
+                pumpfun_program,
 
                 {
-                    "limit":20
+                    "limit":50
                 }
 
             ]
@@ -51,17 +53,17 @@ class PumpFunScanner:
 
         try:
 
-            response = requests.post(
-                self.base_url,
+            r = requests.post(
+                self.rpc,
                 json=payload,
                 timeout=20
             )
 
 
-            data=response.json()
+            data = r.json()
 
 
-            firmas=data.get(
+            firmas = data.get(
                 "result",
                 []
             )
@@ -70,41 +72,32 @@ class PumpFunScanner:
             tokens=[]
 
 
-            for firma in firmas:
+            for item in firmas:
 
 
                 tokens.append({
 
                     "nombre":
-                    "Nuevo token Solana",
+                    "Nuevo token Pump.fun",
 
 
                     "ticker":
-                    "PENDING",
+                    "UNKNOWN",
 
 
-                    "meta":
-                    70,
+                    "meta":75,
 
+                    "volumen":75,
 
-                    "volumen":
-                    70,
+                    "comunidad":75,
 
+                    "viralidad":75,
 
-                    "comunidad":
-                    70,
-
-
-                    "viralidad":
-                    70,
-
-
-                    "seguridad":
-                    70,
+                    "seguridad":75,
 
 
                     "signature":
-                    firma.get("signature")
+                    item.get("signature")
 
                 })
 
@@ -113,7 +106,6 @@ class PumpFunScanner:
 
 
         except Exception as e:
-
 
             print(e)
 
@@ -125,7 +117,9 @@ class PumpFunScanner:
     def calcular_score(self, token):
 
 
-        score=(
+        return int(
+
+            (
 
             token["meta"]+
             token["volumen"]+
@@ -133,80 +127,9 @@ class PumpFunScanner:
             token["viralidad"]+
             token["seguridad"]
 
-        )//5
+            ) / 5
 
-
-        return score
-
-
-
-
-
-    def analizar(self,ticker):
-
-
-        token={
-
-
-            "nombre":
-            "Token Solana "+ticker,
-
-
-            "ticker":
-            "$"+ticker.upper(),
-
-
-            "meta":75,
-
-
-            "volumen":75,
-
-
-            "comunidad":75,
-
-
-            "viralidad":75,
-
-
-            "seguridad":75
-
-        }
-
-
-
-        token["score"] = self.calcular_score(token)
-
-
-        token["fecha_scan"] = datetime.now().isoformat()
-
-
-
-        if token["score"] >= 85:
-
-
-            token["recomendacion"] = (
-                "🚀 LANZAMIENTO RECOMENDADO"
-            )
-
-
-        elif token["score"] >=70:
-
-
-            token["recomendacion"] = (
-                "⚠️ ANALIZAR MÁS"
-            )
-
-
-        else:
-
-
-            token["recomendacion"] = (
-                "❌ NO RECOMENDADO"
-            )
-
-
-
-        return token
+        )
 
 
 
@@ -215,7 +138,7 @@ class PumpFunScanner:
     def escanear(self):
 
 
-        tokens=self.obtener_tokens()
+        tokens = self.obtener_tokens()
 
 
         resultado=[]
@@ -232,8 +155,57 @@ class PumpFunScanner:
             )
 
 
+            if token["score"] >=85:
+
+                token["recomendacion"] = (
+                    "🚀 LANZAMIENTO RECOMENDADO"
+                )
+
+            elif token["score"] >=70:
+
+                token["recomendacion"] = (
+                    "⚠️ ANALIZAR"
+                )
+
+            else:
+
+                token["recomendacion"] = (
+                    "❌ NO RECOMENDADO"
+                )
+
+
             resultado.append(token)
 
 
 
         return resultado
+
+
+
+
+
+    def analizar(self, ticker):
+
+
+        tokens = self.escanear()
+
+
+        for token in tokens:
+
+
+            if token["ticker"] == ticker.upper():
+
+                return token
+
+
+
+        return {
+
+            "ticker": ticker,
+
+            "score":0,
+
+            "recomendacion":
+            "Token no encontrado"
+
+        }
