@@ -3,32 +3,97 @@
 
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Charlie Launch Intelligence</title>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
-<header>
+
+<header class="hero">
+
 <h1>🚀 Charlie Launch Intelligence</h1>
-<p>Sistema de inteligencia para análisis y detección de oportunidades en memecoins</p>
+
+<p>
+Sistema avanzado de análisis y detección de oportunidades en memecoins
+</p>
+
 </header>
 
 
-<main>
+
+<section class="controls">
+
+<input 
+id="nombre"
+placeholder="Nombre del token">
+
+
+<input 
+id="ticker"
+placeholder="Ticker">
+
+
+<input 
+id="meta"
+type="number"
+placeholder="Tendencia">
+
+
+<input 
+id="volumen"
+type="number"
+placeholder="Volumen">
+
+
+<input 
+id="comunidad"
+type="number"
+placeholder="Comunidad">
+
+
+<input 
+id="viralidad"
+type="number"
+placeholder="Viralidad">
+
+
+<input 
+id="seguridad"
+type="number"
+placeholder="Seguridad">
+
+
+<button onclick="agregarToken()">
+Analizar Token
+</button>
+
+
+</section>
+
+
+
 
 <section class="dashboard">
 
 <h2>Ranking de oportunidades</h2>
 
+
 <div id="resultado"></div>
+
 
 </section>
 
-</main>
+
 
 
 <script src="app.js"></script>
+
 
 </body>
 
