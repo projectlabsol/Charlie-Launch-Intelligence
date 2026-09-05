@@ -1,5 +1,5 @@
 import requests
-import os
+import time
 
 
 class LiveScanner:
@@ -7,124 +7,16 @@ class LiveScanner:
 
     def __init__(self):
 
-        self.helius_key = os.getenv(
-            "HELIUS_API_KEY"
+        self.dex_url = (
+            "https://api.dexscreener.com/latest/dex/search?q=solana"
         )
-
-
-        self.helius_rpc = (
-            "https://mainnet.helius-rpc.com/?api-key="
-            + str(self.helius_key)
-        )
-
 
 
 
 
     def escanear_pumpfun(self):
 
-        tokens = []
-
-
-        try:
-
-            url = (
-                "https://frontend-api.pump.fun/coins"
-                "?offset=0&limit=50"
-                "&sort=created_timestamp"
-                "&order=DESC"
-            )
-
-
-            response = requests.get(
-                url,
-                timeout=20
-            )
-
-
-            data = response.json()
-
-
-
-            for item in data:
-
-
-                mint = item.get(
-                    "mint"
-                )
-
-
-                if not mint:
-                    continue
-
-
-
-                tokens.append({
-
-                    "nombre":
-                    item.get(
-                        "name",
-                        ""
-                    ),
-
-
-                    "ticker":
-                    item.get(
-                        "symbol",
-                        ""
-                    ),
-
-
-                    "mint":
-                    mint,
-
-
-                    "imagen":
-                    item.get(
-                        "image_uri"
-                    ),
-
-
-                    "volumen24h":
-                    0,
-
-
-                    "liquidez":
-                    0,
-
-
-                    "original":
-                    "https://pump.fun/" + mint,
-
-
-                    "dex":
-                    None,
-
-
-                    "web":
-                    None,
-
-
-                    "x":
-                    None
-
-                })
-
-
-
-        except Exception as e:
-
-            print(
-                "PumpFun error:",
-                e
-            )
-
-
-        return tokens
-
-
-
-
+        return []
 
 
 
@@ -137,14 +29,8 @@ class LiveScanner:
 
         try:
 
-
-            url = (
-                "https://api.dexscreener.com/latest/dex/search?q=solana"
-            )
-
-
             response = requests.get(
-                url,
+                self.dex_url,
                 timeout=20
             )
 
@@ -168,20 +54,19 @@ class LiveScanner:
                 )
 
 
-                ticker = base.get(
+                symbol = base.get(
                     "symbol",
                     ""
                 )
 
 
-                if ticker.upper() in [
+                if symbol.upper() in [
                     "SOL",
                     "USDC",
                     "USDT",
-                    "WBTC",
-                    "WETH"
+                    "WETH",
+                    "WBTC"
                 ]:
-
                     continue
 
 
@@ -203,17 +88,18 @@ class LiveScanner:
 
 
 
-                tokens.append({
+                token = {
+
 
                     "nombre":
                     base.get(
                         "name",
-                        ""
+                        "Unknown"
                     ),
 
 
                     "ticker":
-                    ticker,
+                    symbol,
 
 
                     "mint":
@@ -267,13 +153,65 @@ class LiveScanner:
                     "x":
                     None
 
-                })
+                }
+
+
+
+                socials = info.get(
+                    "socials",
+                    []
+                )
+
+
+                for social in socials:
+
+                    if social.get("type") in [
+                        "twitter",
+                        "x"
+                    ]:
+
+                        token["x"] = social.get(
+                            "url"
+                        )
+
+
+
+                websites = info.get(
+                    "websites",
+                    []
+                )
+
+
+                if websites:
+
+                    token["web"] = websites[0].get(
+                        "url"
+                    )
+
+
+
+                token["score"] = self.calcular_score(
+                    token
+                )
+
+
+
+                token["meta"] = self.detectar_meta(
+                    token
+                )
+
+
+
+                tokens.append(
+                    token
+                )
+
 
 
         except Exception as e:
 
             print(
-                "Dex error:",
+                "Scanner error:",
                 e
             )
 
@@ -284,10 +222,71 @@ class LiveScanner:
 
 
 
+    def detectar_meta(
+        self,
+        token
+    ):
+
+
+        texto = (
+
+            token.get(
+                "nombre",
+                ""
+            )
+            +
+            " "
+            +
+            token.get(
+                "ticker",
+                ""
+            )
+
+        ).lower()
 
 
 
-    def analizar_score(
+        if any(x in texto for x in [
+            "ai",
+            "agent",
+            "gpt",
+            "bot"
+        ]):
+
+            return "AI"
+
+
+
+        if any(x in texto for x in [
+            "dog",
+            "cat",
+            "frog",
+            "ape"
+        ]):
+
+            return "Animal"
+
+
+
+        if any(x in texto for x in [
+            "game",
+            "gaming",
+            "play"
+        ]):
+
+            return "Gaming"
+
+
+
+        return "Meme"
+
+
+
+
+
+
+
+    def calcular_score(
         self,
         token
     ):
@@ -310,32 +309,58 @@ class LiveScanner:
 
 
 
-        if volumen > 1000000:
+        if volumen >= 1000000:
 
             score += 40
 
-        elif volumen > 100000:
-
-            score += 25
-
-        elif volumen > 10000:
-
-            score += 15
-
-
-
-        if liquidez > 100000:
+        elif volumen >= 100000:
 
             score += 30
 
-        elif liquidez > 10000:
+        elif volumen >= 10000:
 
-            score += 15
+            score += 20
+
+        else:
+
+            score += 10
+
+
+
+
+        if liquidez >= 100000:
+
+            score += 30
+
+        elif liquidez >= 10000:
+
+            score += 20
+
+        else:
+
+            score += 10
+
 
 
 
         if token.get(
             "imagen"
+        ):
+
+            score += 10
+
+
+
+        if token.get(
+            "x"
+        ):
+
+            score += 10
+
+
+
+        if token.get(
+            "web"
         ):
 
             score += 10
@@ -352,11 +377,8 @@ class LiveScanner:
 
 
 
-
-
     def recomendar(
-        self,
-        excluir=None
+        self
     ):
 
 
@@ -374,24 +396,23 @@ class LiveScanner:
 
 
 
-        for token in tokens:
+        if not tokens:
 
-            token["score"] = self.analizar_score(
-                token
-            )
+            return {
 
+                "mensaje":
+                "Sin oportunidades"
 
-
-        tokens = [
-            x for x in tokens
-            if x["score"] >= 40
-        ]
+            }
 
 
 
         tokens.sort(
             key=lambda x: (
-                x["score"],
+                x.get(
+                    "score",
+                    0
+                ),
                 x.get(
                     "volumen24h",
                     0
@@ -406,15 +427,4 @@ class LiveScanner:
 
 
 
-        if tokens:
-
-            return tokens[0]
-
-
-
-        return {
-
-            "mensaje":
-            "No se encontraron oportunidades"
-
-        }
+        return tokens[0]
