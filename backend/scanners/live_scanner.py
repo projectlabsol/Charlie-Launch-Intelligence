@@ -1,5 +1,4 @@
 import requests
-import time
 
 
 class LiveScanner:
@@ -7,9 +6,11 @@ class LiveScanner:
 
     def __init__(self):
 
-        self.dex_url = (
+        self.sources = [
+            "https://api.dexscreener.com/latest/dex/search?q=pump",
+            "https://api.dexscreener.com/latest/dex/search?q=memecoin",
             "https://api.dexscreener.com/latest/dex/search?q=solana"
-        )
+        ]
 
 
 
@@ -23,200 +24,201 @@ class LiveScanner:
 
     def escanear_mercado(self):
 
-
         tokens = []
 
 
-        try:
-
-            response = requests.get(
-                self.dex_url,
-                timeout=20
-            )
+        for url in self.sources:
 
 
-            data = response.json()
+            try:
 
-
-            pairs = data.get(
-                "pairs",
-                []
-            )
-
-
-
-            for pair in pairs:
-
-
-                base = pair.get(
-                    "baseToken",
-                    {}
+                response = requests.get(
+                    url,
+                    timeout=20
                 )
 
 
-                symbol = base.get(
-                    "symbol",
-                    ""
-                )
+                data = response.json()
 
 
-                if symbol.upper() in [
-                    "SOL",
-                    "USDC",
-                    "USDT",
-                    "WETH",
-                    "WBTC"
-                ]:
-                    continue
-
-
-
-                mint = base.get(
-                    "address"
-                )
-
-
-                if not mint:
-                    continue
-
-
-
-                info = pair.get(
-                    "info",
-                    {}
-                )
-
-
-
-                token = {
-
-
-                    "nombre":
-                    base.get(
-                        "name",
-                        "Unknown"
-                    ),
-
-
-                    "ticker":
-                    symbol,
-
-
-                    "mint":
-                    mint,
-
-
-                    "imagen":
-                    info.get(
-                        "imageUrl"
-                    ),
-
-
-                    "volumen24h":
-                    float(
-                        pair.get(
-                            "volume",
-                            {}
-                        ).get(
-                            "h24",
-                            0
-                        )
-                    ),
-
-
-                    "liquidez":
-                    float(
-                        pair.get(
-                            "liquidity",
-                            {}
-                        ).get(
-                            "usd",
-                            0
-                        )
-                    ),
-
-
-                    "original":
-                    "https://pump.fun/" + mint,
-
-
-                    "dex":
-                    pair.get(
-                        "url"
-                    ),
-
-
-                    "web":
-                    None,
-
-
-                    "x":
-                    None
-
-                }
-
-
-
-                socials = info.get(
-                    "socials",
+                pairs = data.get(
+                    "pairs",
                     []
                 )
 
 
-                for social in socials:
-
-                    if social.get("type") in [
-                        "twitter",
-                        "x"
-                    ]:
-
-                        token["x"] = social.get(
-                            "url"
-                        )
+                for pair in pairs:
 
 
+                    base = pair.get(
+                        "baseToken",
+                        {}
+                    )
 
-                websites = info.get(
-                    "websites",
-                    []
-                )
+
+                    mint = base.get(
+                        "address"
+                    )
 
 
-                if websites:
+                    if not mint:
+                        continue
 
-                    token["web"] = websites[0].get(
-                        "url"
+
+
+                    ticker = base.get(
+                        "symbol",
+                        ""
                     )
 
 
 
-                token["score"] = self.calcular_score(
-                    token
+                    if ticker.upper() in [
+                        "SOL",
+                        "USDC",
+                        "USDT",
+                        "WETH",
+                        "WBTC"
+                    ]:
+                        continue
+
+
+
+                    info = pair.get(
+                        "info",
+                        {}
+                    )
+
+
+
+                    token = {
+
+
+                        "nombre":
+                        base.get(
+                            "name",
+                            ""
+                        ),
+
+
+                        "ticker":
+                        ticker,
+
+
+                        "mint":
+                        mint,
+
+
+                        "imagen":
+                        info.get(
+                            "imageUrl"
+                        ),
+
+
+                        "volumen24h":
+                        float(
+                            pair.get(
+                                "volume",
+                                {}
+                            ).get(
+                                "h24",
+                                0
+                            )
+                        ),
+
+
+                        "liquidez":
+                        float(
+                            pair.get(
+                                "liquidity",
+                                {}
+                            ).get(
+                                "usd",
+                                0
+                            )
+                        ),
+
+
+                        "original":
+                        "https://pump.fun/" + mint,
+
+
+                        "dex":
+                        pair.get(
+                            "url"
+                        ),
+
+
+                        "web":
+                        None,
+
+
+                        "x":
+                        None
+
+                    }
+
+
+
+                    for social in info.get(
+                        "socials",
+                        []
+                    ):
+
+
+                        if social.get(
+                            "type"
+                        ) in [
+                            "twitter",
+                            "x"
+                        ]:
+
+                            token["x"] = social.get(
+                                "url"
+                            )
+
+
+
+                    for site in info.get(
+                        "websites",
+                        []
+                    ):
+
+                        if site.get(
+                            "url"
+                        ):
+
+                            token["web"] = site["url"]
+
+
+
+                    token["meta"] = self.detectar_meta(
+                        token
+                    )
+
+
+                    token["score"] = self.calcular_score(
+                        token
+                    )
+
+
+                    tokens.append(
+                        token
+                    )
+
+
+
+            except Exception as e:
+
+                print(
+                    "Fuente error:",
+                    e
                 )
 
-
-
-                token["meta"] = self.detectar_meta(
-                    token
-                )
-
-
-
-                tokens.append(
-                    token
-                )
-
-
-
-        except Exception as e:
-
-            print(
-                "Scanner error:",
-                e
-            )
 
 
         return tokens
+
 
 
 
@@ -278,6 +280,16 @@ class LiveScanner:
 
 
 
+        if any(x in texto for x in [
+            "pepe",
+            "meme",
+            "elon"
+        ]):
+
+            return "Viral"
+
+
+
         return "Meme"
 
 
@@ -293,7 +305,6 @@ class LiveScanner:
 
 
         score = 0
-
 
 
         volumen = token.get(
@@ -342,7 +353,6 @@ class LiveScanner:
 
 
 
-
         if token.get(
             "imagen"
         ):
@@ -377,8 +387,10 @@ class LiveScanner:
 
 
 
+
     def recomendar(
-        self
+        self,
+        excluir=None
     ):
 
 
@@ -396,19 +408,26 @@ class LiveScanner:
 
 
 
+        if excluir:
+
+            tokens = [
+                x for x in tokens
+                if x.get("mint") != excluir
+            ]
+
+
+
         if not tokens:
 
             return {
-
                 "mensaje":
                 "Sin oportunidades"
-
             }
 
 
 
         tokens.sort(
-            key=lambda x: (
+            key=lambda x:(
                 x.get(
                     "score",
                     0
@@ -424,7 +443,6 @@ class LiveScanner:
             ),
             reverse=True
         )
-
 
 
         return tokens[0]
