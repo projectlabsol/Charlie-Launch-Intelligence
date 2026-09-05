@@ -1,7 +1,5 @@
 import requests
 import os
-import random
-
 
 
 class LiveScanner:
@@ -20,15 +18,10 @@ class LiveScanner:
 
 
 
-
-
     def escanear_pumpfun(self):
 
-        # Próxima conexión directa Pump.fun
-
+        # Pendiente conexión directa Pump.fun API
         return []
-
-
 
 
 
@@ -36,12 +29,10 @@ class LiveScanner:
 
     def escanear_mercado(self):
 
-
         tokens = []
 
 
         try:
-
 
             url = (
                 "https://api.dexscreener.com/latest/dex/search?q=solana"
@@ -68,7 +59,8 @@ class LiveScanner:
                 "SOL",
                 "USDC",
                 "USDT",
-                "WETH"
+                "WETH",
+                "WBTC"
             ]
 
 
@@ -100,9 +92,7 @@ class LiveScanner:
                 )
 
 
-
                 if ticker.upper() in bloqueados:
-
                     continue
 
 
@@ -112,27 +102,21 @@ class LiveScanner:
                 )
 
 
-
                 if not mint:
-
                     continue
-
 
 
 
                 token = {
 
 
-                    "nombre":
-                    nombre,
+                    "nombre": nombre,
 
 
-                    "ticker":
-                    ticker,
+                    "ticker": ticker,
 
 
-                    "mint":
-                    mint,
+                    "mint": mint,
 
 
                     "imagen":
@@ -141,8 +125,7 @@ class LiveScanner:
                     ),
 
 
-
-                    "volumen":
+                    "volumen24h":
                     float(
                         pair.get(
                             "volume",
@@ -152,7 +135,6 @@ class LiveScanner:
                             0
                         )
                     ),
-
 
 
                     "liquidez":
@@ -167,23 +149,18 @@ class LiveScanner:
                     ),
 
 
-
                     "original":
                     pair.get(
                         "url"
                     ),
 
 
-
-                    "web":
-                    None,
+                    "web": None,
 
 
-                    "x":
-                    None
+                    "x": None
 
                 }
-
 
 
 
@@ -201,8 +178,6 @@ class LiveScanner:
 
 
 
-
-
                 socials = info.get(
                     "socials",
                     []
@@ -210,7 +185,6 @@ class LiveScanner:
 
 
                 for social in socials:
-
 
                     if social.get(
                         "type"
@@ -222,7 +196,6 @@ class LiveScanner:
                         token["x"] = social.get(
                             "url"
                         )
-
 
 
 
@@ -240,9 +213,7 @@ class LiveScanner:
             )
 
 
-
         return tokens
-
 
 
 
@@ -267,63 +238,50 @@ class LiveScanner:
 
 
 
-        categorias = {
+        if any(x in texto for x in [
+            "ai",
+            "agent",
+            "gpt",
+            "bot"
+        ]):
 
-
-            "AI":
-            [
-                "ai",
-                "agent",
-                "gpt",
-                "bot"
-            ],
-
-
-
-            "Gaming":
-            [
-                "game",
-                "gaming",
-                "play"
-            ],
+            return "AI"
 
 
 
-            "Animal":
-            [
-                "dog",
-                "cat",
-                "frog",
-                "ape"
-            ],
+        if any(x in texto for x in [
+            "game",
+            "gaming",
+            "play"
+        ]):
+
+            return "Gaming"
 
 
 
-            "Viral":
-            [
-                "meme",
-                "pepe",
-                "doge",
-                "elon"
-            ]
+        if any(x in texto for x in [
+            "dog",
+            "cat",
+            "frog",
+            "ape"
+        ]):
 
-        }
-
+            return "Animal"
 
 
-        for categoria,palabras in categorias.items():
 
-            for palabra in palabras:
+        if any(x in texto for x in [
+            "pepe",
+            "meme",
+            "doge",
+            "elon"
+        ]):
 
-                if palabra in texto:
-
-                    return categoria
+            return "Viral"
 
 
 
         return "Meme"
-
-
 
 
 
@@ -342,7 +300,7 @@ class LiveScanner:
 
 
         volumen = token.get(
-            "volumen",
+            "volumen24h",
             0
         )
 
@@ -354,42 +312,41 @@ class LiveScanner:
 
 
 
-        if volumen >= 1000000:
+        # Momentum
+
+        if volumen > 1000000:
 
             score += 35
 
-        elif volumen >= 100000:
+        elif volumen > 100000:
 
             score += 25
 
-        elif volumen >= 10000:
+        elif volumen > 10000:
 
             score += 15
 
 
 
-        if liquidez >= 100000:
+        # Liquidez
+
+        if liquidez > 100000:
 
             score += 25
 
-        elif liquidez >= 10000:
+        elif liquidez > 10000:
 
             score += 15
 
-        elif liquidez >= 5000:
-
-            score += 10
 
 
-
-
+        # Identidad
 
         if token.get(
             "imagen"
         ):
 
             score += 10
-
 
 
 
@@ -401,13 +358,11 @@ class LiveScanner:
 
 
 
-
         if token.get(
             "web"
         ):
 
             score += 5
-
 
 
 
@@ -417,7 +372,6 @@ class LiveScanner:
 
 
         token["meta"] = meta
-
 
 
 
@@ -431,34 +385,30 @@ class LiveScanner:
 
 
 
-
-        return min(
+        token["score"] = min(
             score,
             100
         )
 
 
+        return token["score"]
 
 
 
 
 
 
-    def recomendar(
-        self,
-        excluir=None
-    ):
 
+
+    def recomendar(self):
 
 
         tokens = []
 
 
-
         tokens.extend(
             self.escanear_pumpfun()
         )
-
 
 
         tokens.extend(
@@ -467,63 +417,37 @@ class LiveScanner:
 
 
 
-        candidatos = []
-
-
-
         for token in tokens:
 
-
-            if excluir and token.get("mint") == excluir:
-
-                continue
-
-
-
-            token["score"] = self.analizar_score(
+            self.analizar_score(
                 token
             )
 
 
 
-            if token["score"] >= 50:
-
-                candidatos.append(
-                    token
-                )
-
-
-
-
-
-        candidatos.sort(
-
+        tokens.sort(
             key=lambda x: (
-
-                x["score"],
-                x["volumen"],
-                x["liquidez"]
-
+                x.get(
+                    "score",
+                    0
+                ),
+                x.get(
+                    "volumen24h",
+                    0
+                ),
+                x.get(
+                    "liquidez",
+                    0
+                )
             ),
-
             reverse=True
-
         )
 
 
 
-        if candidatos:
+        if tokens:
 
-
-            # toma entre las mejores 5 para variar resultados
-
-            mejores = candidatos[:5]
-
-
-            return random.choice(
-                mejores
-            )
-
+            return tokens[0]
 
 
 
