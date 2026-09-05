@@ -1,6 +1,6 @@
 import requests
 import os
-import time
+
 
 
 class LiveScanner:
@@ -19,12 +19,16 @@ class LiveScanner:
         )
 
 
-        # memoria temporal de sesión
+        # memoria temporal
         self.mostrados = set()
 
 
 
+
+
     def escanear_pumpfun(self):
+
+        # Próxima integración directa Pump.fun
 
         return []
 
@@ -32,7 +36,10 @@ class LiveScanner:
 
 
 
+
+
     def escanear_mercado(self):
+
 
         tokens = []
 
@@ -82,15 +89,8 @@ class LiveScanner:
                 )
 
 
+
                 if not mint:
-
-                    continue
-
-
-
-                # evitar repetidos
-
-                if mint in self.mostrados:
 
                     continue
 
@@ -162,39 +162,43 @@ class LiveScanner:
 
 
                     "web":
-                    [],
+                    None,
 
 
 
                     "x":
                     None
 
-
                 }
 
 
 
-                for site in info.get(
+
+
+                websites = info.get(
                     "websites",
                     []
-                ):
+                )
 
 
-                    if site.get(
+                if websites:
+
+                    token["web"] = websites[0].get(
                         "url"
-                    ):
-
-                        token["web"].append(
-                            site["url"]
-                        )
+                    )
 
 
 
 
-                for social in info.get(
+
+
+                socials = info.get(
                     "socials",
                     []
-                ):
+                )
+
+
+                for social in socials:
 
 
                     if social.get(
@@ -205,6 +209,9 @@ class LiveScanner:
                         token["x"] = social.get(
                             "url"
                         )
+
+
+
 
 
 
@@ -225,6 +232,8 @@ class LiveScanner:
 
 
         return tokens
+
+
 
 
 
@@ -261,6 +270,12 @@ class LiveScanner:
 
             score += 20
 
+        elif volumen >= 1000:
+
+            score += 10
+
+
+
 
 
         if liquidez >= 50000:
@@ -269,7 +284,12 @@ class LiveScanner:
 
         elif liquidez >= 5000:
 
-            score += 15
+            score += 20
+
+        elif liquidez >= 1000:
+
+            score += 10
+
 
 
 
@@ -282,6 +302,7 @@ class LiveScanner:
 
 
 
+
         if token.get(
             "x"
         ):
@@ -290,11 +311,15 @@ class LiveScanner:
 
 
 
+
+
         if token.get(
             "web"
         ):
 
             score += 5
+
+
 
 
 
@@ -309,10 +334,17 @@ class LiveScanner:
 
 
 
-    def recomendar(self):
+
+
+    def recomendar(
+        self,
+        excluir=None
+    ):
+
 
 
         tokens = []
+
 
 
         tokens.extend(
@@ -326,7 +358,32 @@ class LiveScanner:
 
 
 
+
+        candidatos = []
+
+
+
         for token in tokens:
+
+
+
+            # evitar moneda actual
+
+            if excluir and token["mint"] == excluir:
+
+                continue
+
+
+
+
+            # evitar monedas ya vistas
+
+            if token["mint"] in self.mostrados:
+
+                continue
+
+
+
 
 
             token["score"] = self.analizar_score(
@@ -335,7 +392,18 @@ class LiveScanner:
 
 
 
-        tokens.sort(
+            if token["score"] >= 60:
+
+                candidatos.append(
+                    token
+                )
+
+
+
+
+
+
+        candidatos.sort(
             key=lambda x:(
                 x["score"],
                 x["volumen"],
@@ -346,18 +414,22 @@ class LiveScanner:
 
 
 
-        for token in tokens:
 
 
-            if token["score"] >= 60:
+        if candidatos:
 
 
-                self.mostrados.add(
-                    token["mint"]
-                )
+            elegido = candidatos[0]
 
 
-                return token
+            self.mostrados.add(
+                elegido["mint"]
+            )
+
+
+            return elegido
+
+
 
 
 
