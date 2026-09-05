@@ -6,25 +6,21 @@ box-sizing:border-box;
 body{
 
 margin:0;
-
 padding:0;
-
 background:#050816;
-
 color:white;
-
 font-family:Arial,sans-serif;
 
 }
 
 
 
+/* CABECERA */
+
 .hero{
 
 text-align:center;
-
 padding:50px;
-
 border-bottom:1px solid #00ff99;
 
 }
@@ -33,20 +29,20 @@ border-bottom:1px solid #00ff99;
 .hero h1{
 
 color:#00ff99;
-
 font-size:42px;
 
 }
 
 
 
+/* CONTROLES */
+
 .control{
 
 padding:35px;
-
 display:flex;
-
 gap:15px;
+flex-wrap:wrap;
 
 }
 
@@ -54,68 +50,173 @@ gap:15px;
 input{
 
 padding:15px;
-
 width:280px;
-
 border-radius:10px;
-
 border:none;
 
 }
 
 
+
+/* BOTONES */
 
 button{
 
-padding:15px 25px;
-
+padding:14px 22px;
 background:#00ff99;
-
 border:none;
-
 border-radius:10px;
-
 font-weight:bold;
-
 cursor:pointer;
+transition:.3s;
 
 }
 
 
+button:hover{
+
+background:#00cc77;
+transform:translateY(-2px);
+
+}
+
+
+
+
+/* TITULOS */
 
 h2{
 
 color:#00ff99;
-
 padding-left:25px;
 
 }
 
 
 
+
+/* TARJETA PRINCIPAL */
+
 .card{
 
 margin:25px;
 
-padding:25px;
+padding:30px;
 
-background:#111827;
+background:#0b1220;
 
 border:1px solid #00ff99;
 
-border-radius:15px;
+border-radius:20px;
 
 }
 
 
 
-.card h3{
+.token-card{
+
+display:grid;
+
+grid-template-columns:220px 1fr;
+
+gap:35px;
+
+align-items:center;
+
+}
+
+
+
+.token-image{
+
+width:180px;
+
+height:180px;
+
+object-fit:cover;
+
+border-radius:20px;
+
+border:3px solid #00ff99;
+
+background:#111827;
+
+}
+
+
+
+.token-card h1{
+
+font-size:36px;
+
+color:white;
+
+}
+
+
+
+.token-card h2{
+
+padding:0;
 
 color:#00ff99;
 
 }
 
 
+
+.token-card p{
+
+font-size:17px;
+
+line-height:1.6;
+
+color:#d1d5db;
+
+}
+
+
+
+.token-card span{
+
+color:#00ff99;
+
+}
+
+
+
+
+/* SCORE */
+
+.score{
+
+font-size:30px;
+
+color:#00ff99;
+
+font-weight:bold;
+
+}
+
+
+
+/* BOTONES INTERNOS */
+
+.buttons{
+
+display:flex;
+
+gap:12px;
+
+flex-wrap:wrap;
+
+margin-top:20px;
+
+}
+
+
+
+/* RECOMENDACION */
 
 .recomendacion{
 
@@ -128,6 +229,7 @@ border-radius:15px;
 font-size:18px;
 
 }
+
 
 
 
@@ -156,5 +258,40 @@ background:#332b00;
 border:3px solid red;
 
 background:#330000;
+
+}
+
+
+
+/* MOVIL */
+
+@media(max-width:700px){
+
+
+.token-card{
+
+display:flex;
+
+flex-direction:column;
+
+text-align:center;
+
+}
+
+
+.token-image{
+
+width:140px;
+height:140px;
+
+}
+
+
+.token-card h1{
+
+font-size:28px;
+
+}
+
 
 }
