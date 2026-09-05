@@ -4,6 +4,7 @@ import os
 
 class LiveScanner:
 
+
     def __init__(self):
 
         self.helius_key = os.getenv(
@@ -16,13 +17,15 @@ class LiveScanner:
         )
 
 
+
     def escanear_pumpfun(self):
 
         tokens = []
 
-        # Aquí conectaremos Pump.fun real
+        # Próxima integración directa Pump.fun
 
         return tokens
+
 
 
 
@@ -30,18 +33,22 @@ class LiveScanner:
 
         tokens = []
 
+
         try:
 
             url = (
                 "https://api.dexscreener.com/latest/dex/search?q=pump"
             )
 
+
             response = requests.get(
                 url,
                 timeout=20
             )
 
+
             data = response.json()
+
 
             pairs = data.get(
                 "pairs",
@@ -49,29 +56,120 @@ class LiveScanner:
             )
 
 
+
             for pair in pairs:
 
-                tokens.append({
+
+                base = pair.get(
+                    "baseToken",
+                    {}
+                )
+
+
+                info = pair.get(
+                    "info",
+                    {}
+                )
+
+
+
+                token = {
 
                     "nombre":
-                    pair.get("baseToken", {}).get("name"),
+                    base.get(
+                        "name",
+                        "Unknown"
+                    ),
+
 
                     "ticker":
-                    pair.get("baseToken", {}).get("symbol"),
+                    base.get(
+                        "symbol",
+                        "UNKNOWN"
+                    ),
+
 
                     "mint":
-                    pair.get("baseToken", {}).get("address"),
+                    base.get(
+                        "address"
+                    ),
+
+
+                    "imagen":
+                    info.get(
+                        "imageUrl"
+                    ),
+
+
+                    "web":
+                    [],
+
+
+                    "x":
+                    None,
+
 
                     "volumen":
-                    pair.get("volume", {}).get("h24",0),
+                    pair.get(
+                        "volume",
+                        {}
+                    ).get(
+                        "h24",
+                        0
+                    ),
+
 
                     "liquidez":
-                    pair.get("liquidity", {}).get("usd",0),
+                    pair.get(
+                        "liquidity",
+                        {}
+                    ).get(
+                        "usd",
+                        0
+                    ),
 
-                    "url":
-                    pair.get("url")
 
-                })
+                    "original":
+                    pair.get(
+                        "url"
+                    )
+
+                }
+
+
+
+                # Extraer web y redes sociales
+
+                for item in info.get(
+                    "websites",
+                    []
+                ):
+
+                    if item.get("url"):
+
+                        token["web"].append(
+                            item["url"]
+                        )
+
+
+
+                for social in info.get(
+                    "socials",
+                    []
+                ):
+
+                    if social.get("type") == "twitter":
+
+                        token["x"] = social.get(
+                            "url"
+                        )
+
+
+
+                tokens.append(
+                    token
+                )
+
 
 
         except Exception as e:
@@ -82,7 +180,10 @@ class LiveScanner:
             )
 
 
+
         return tokens
+
+
 
 
 
@@ -91,37 +192,118 @@ class LiveScanner:
         score = 0
 
 
-        if float(token.get("volumen",0)) > 10000:
+
+        volumen = float(
+            token.get(
+                "volumen",
+                0
+            )
+        )
+
+
+        liquidez = float(
+            token.get(
+                "liquidez",
+                0
+            )
+        )
+
+
+
+        if volumen >= 100000:
+
             score += 30
 
+        elif volumen >= 10000:
 
-        if float(token.get("liquidez",0)) > 5000:
             score += 20
 
 
-        if token.get("nombre"):
+
+
+        if liquidez >= 50000:
+
+            score += 25
+
+        elif liquidez >= 5000:
+
+            score += 15
+
+
+
+
+        if token.get(
+            "imagen"
+        ):
+
             score += 10
 
 
-        if token.get("ticker"):
+
+        if len(
+            token.get(
+                "web",
+                []
+            )
+        ) > 0:
+
+            score += 15
+
+
+
+
+        if token.get(
+            "x"
+        ):
+
             score += 10
 
 
-        return score
+
+
+        if token.get(
+            "nombre"
+        ):
+
+            score += 5
+
+
+
+        if token.get(
+            "ticker"
+        ):
+
+            score += 5
+
+
+
+        return min(
+            score,
+            100
+        )
+
+
+
 
 
 
     def recomendar(self):
 
+
         tokens = []
+
+
 
         tokens.extend(
             self.escanear_pumpfun()
         )
 
+
+
         tokens.extend(
             self.escanear_mercado()
         )
+
 
 
         for token in tokens:
@@ -131,18 +313,43 @@ class LiveScanner:
             )
 
 
-        tokens.sort(
-            key=lambda x:x.get("score",0),
+
+        # Filtrar oportunidades reales
+
+        candidatos = []
+
+
+        for token in tokens:
+
+
+            if token["score"] >= 60:
+
+                candidatos.append(
+                    token
+                )
+
+
+
+        candidatos.sort(
+            key=lambda x:x.get(
+                "score",
+                0
+            ),
             reverse=True
         )
 
 
-        if len(tokens) > 0:
 
-            return tokens[0]
+        if candidatos:
+
+
+            return candidatos[0]
+
 
 
         return {
+
             "mensaje":
             "No se encontraron oportunidades"
+
         }
