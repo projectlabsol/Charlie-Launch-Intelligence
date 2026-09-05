@@ -23,48 +23,35 @@ scanner = LiveScanner()
 
 
 
-
-
 @app.get("/")
 def inicio():
 
     return {
-        "estado": "Charlie Launch Intelligence activo"
+        "estado":
+        "Charlie Launch Intelligence activo"
     }
-
-
 
 
 
 
 
 @app.get("/recomendar")
-def recomendar_lanzamiento():
-
-    token = scanner.recomendar()
-
-
-    return {
-        "recomendacion": token
-    }
+def recomendar_lanzamiento(
+    excluir: str = None
+):
 
 
-
-
-
-
-
-@app.get("/buscar-otra")
-def buscar_otra():
-
-    token = scanner.recomendar()
+    token = scanner.recomendar(
+        excluir
+    )
 
 
     return {
-        "recomendacion": token
+
+        "recomendacion":
+        token
+
     }
-
-
 
 
 
@@ -72,6 +59,7 @@ def buscar_otra():
 
 @app.get("/ranking")
 def ranking():
+
 
     tokens = scanner.escanear_mercado()
 
@@ -84,9 +72,9 @@ def ranking():
 
 
     tokens.sort(
-        key=lambda x: (
+        key=lambda x:(
             x.get("score",0),
-            x.get("volumen",0),
+            x.get("volumen24h",0),
             x.get("liquidez",0)
         ),
         reverse=True
@@ -99,21 +87,19 @@ def ranking():
 
 
 
-
-
 @app.get("/analizar/{ticker}")
-def analizar_token(ticker:str):
+def analizar_token(
+    ticker:str
+):
 
 
     tokens = scanner.escanear_mercado()
-
 
 
     for token in tokens:
 
 
         if token.get("ticker","").upper() == ticker.upper():
-
 
             token["score"] = scanner.analizar_score(
                 token
@@ -124,13 +110,15 @@ def analizar_token(ticker:str):
 
 
 
-
     return {
 
-        "ticker": ticker,
+        "ticker":
+        ticker,
 
-        "score": 0,
+        "score":
+        0,
 
-        "mensaje": "Token no encontrado"
+        "mensaje":
+        "Token no encontrado"
 
     }
