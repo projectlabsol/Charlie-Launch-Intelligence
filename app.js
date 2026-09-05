@@ -1,10 +1,18 @@
 const API_URL = "https://charlie-launch-intelligence.onrender.com";
 
 
+let tokensMostrados = [];
+
+
+
+// =============================
+// ANALIZAR TOKEN
+// =============================
 
 function analizarToken(){
 
-    const ticker = document.getElementById("ticker").value;
+    const ticker =
+    document.getElementById("ticker").value;
 
 
     if(!ticker){
@@ -16,23 +24,25 @@ function analizarToken(){
     }
 
 
+
     fetch(`${API_URL}/analizar/${ticker.toUpperCase()}`)
 
-    .then(response => response.json())
+    .then(response=>response.json())
 
-    .then(data => {
+    .then(data=>{
 
         mostrarResultado(data);
 
     })
 
-    .catch(error => {
+    .catch(error=>{
 
         console.log(error);
 
         alert("No se pudo conectar con el motor");
 
     });
+
 
 }
 
@@ -43,139 +53,8 @@ function analizarToken(){
 function mostrarResultado(data){
 
 
-    const resultado = document.getElementById("resultado");
+    document.getElementById("resultado").innerHTML = crearCardToken(data);
 
-
-    resultado.innerHTML = `
-
-
-    <div class="card token-card">
-
-
-        ${data.imagen ? 
-
-        `<img src="${data.imagen}" class="token-image">`
-
-        :
-
-        ""
-
-        }
-
-
-
-        <h2>
-
-        ${data.nombre || "Token"}
-
-        <span>
-
-        $${data.ticker || ""}
-
-        </span>
-
-        </h2>
-
-
-
-        <h1>
-
-        Score: ${data.score}/100
-
-        </h1>
-
-
-
-        <p>
-
-        CA:
-
-        ${data.mint || ""}
-
-        </p>
-
-
-
-        <p>
-
-        Volumen 24H:
-
-        $${data.volumen || 0}
-
-        </p>
-
-
-
-        <p>
-
-        Liquidez:
-
-        $${data.liquidez || 0}
-
-        </p>
-
-
-
-
-        <div class="buttons">
-
-
-        <button onclick="copiarCA('${data.mint}')">
-
-        📋 Copiar CA
-
-        </button>
-
-
-
-        <button onclick="window.open('${data.original}')">
-
-        🚀 Abrir Original
-
-        </button>
-
-
-
-
-        ${data.x ?
-
-        `<button onclick="window.open('${data.x}')">
-
-        𝕏 Ver X
-
-        </button>`
-
-        :
-
-        ""
-
-        }
-
-
-
-        ${data.web && data.web.length ?
-
-        `<button onclick="window.open('${data.web[0]}')">
-
-        🌐 Ver Web
-
-        </button>`
-
-        :
-
-        ""
-
-        }
-
-
-
-        </div>
-
-
-    </div>
-
-
-    `;
 
 }
 
@@ -183,21 +62,58 @@ function mostrarResultado(data){
 
 
 
+
+// =============================
+// RECOMENDACION EN TIEMPO REAL
+// =============================
+
+
 function recomendarLanzamiento(){
 
 
-    fetch(`${API_URL}/recomendar`)
+    fetch(`${API_URL}/recomendar?t=${Date.now()}`)
 
 
-    .then(response => response.json())
+    .then(response=>response.json())
 
 
-    .then(data => {
+    .then(data=>{
 
 
-        mostrarRecomendacion(
-            data.recomendacion
-        );
+        let token = data.recomendacion;
+
+
+
+        if(!token){
+
+            mostrarSinResultado();
+
+            return;
+
+        }
+
+
+
+        // evitar repetidos
+
+        if(tokensMostrados.includes(token.mint)){
+
+
+            buscarOtra();
+
+
+            return;
+
+        }
+
+
+
+        tokensMostrados.push(token.mint);
+
+
+
+        mostrarRecomendacion(token);
+
 
 
     })
@@ -223,6 +139,12 @@ function recomendarLanzamiento(){
 
 
 
+
+// =============================
+// BUSCAR OTRA MONEDA
+// =============================
+
+
 function buscarOtra(){
 
 
@@ -235,176 +157,23 @@ function buscarOtra(){
 
 
 
+
+// =============================
+// MOSTRAR RECOMENDACION
+// =============================
+
+
 function mostrarRecomendacion(token){
 
 
-    const recomendacion =
+    const zona =
     document.getElementById(
         "recomendacion"
     );
 
 
 
-    if(!token){
-
-
-        recomendacion.innerHTML = `
-
-        <div class="card">
-
-        ❌ Sin oportunidades
-
-        </div>
-
-        `;
-
-
-        return;
-
-    }
-
-
-
-
-    recomendacion.innerHTML = `
-
-
-    <div class="card token-card">
-
-
-        <h2>
-
-        🚀 Recomendación de Lanzamiento
-
-        </h2>
-
-
-
-        <img 
-
-        src="${token.imagen || ''}"
-
-        class="token-image"
-
-        >
-
-
-
-        <h1>
-
-        ${token.nombre}
-
-        $${token.ticker}
-
-        </h1>
-
-
-
-
-        <h2>
-
-        Score ${token.score}/100
-
-        </h2>
-
-
-
-
-        <p>
-
-        Volumen 24H:
-
-        $${token.volumen}
-
-        </p>
-
-
-
-        <p>
-
-        Liquidez:
-
-        $${token.liquidez}
-
-        </p>
-
-
-
-        <p>
-
-        CA:
-
-        ${token.mint}
-
-        </p>
-
-
-
-        <button onclick="copiarCA('${token.mint}')">
-
-        📋 Copiar CA
-
-        </button>
-
-
-
-        <button onclick="window.open('${token.original}')">
-
-        🚀 Abrir Original
-
-        </button>
-
-
-
-
-        <button onclick="buscarOtra()">
-
-        🔄 Buscar Otra
-
-        </button>
-
-
-
-
-        ${
-        token.x ?
-
-        `<button onclick="window.open('${token.x}')">
-
-        𝕏 Ver X
-
-        </button>`
-
-        :
-
-        ""
-
-        }
-
-
-
-
-        ${
-        token.web && token.web.length ?
-
-        `<button onclick="window.open('${token.web[0]}')">
-
-        🌐 Ver Web
-
-        </button>`
-
-        :
-
-        ""
-
-        }
-
-
-
-    </div>
-
-
-    `;
+    zona.innerHTML = crearCardToken(token,true);
 
 
 }
@@ -413,14 +182,280 @@ function mostrarRecomendacion(token){
 
 
 
+
+function crearCardToken(token,recomendado=false){
+
+
+return `
+
+
+<div class="card token-card">
+
+
+
+${token.imagen ? `
+
+<img 
+src="${token.imagen}"
+class="token-image">
+
+`:""}
+
+
+
+<h2>
+
+${recomendado ? "🚀 Recomendación de Lanzamiento" : ""}
+
+</h2>
+
+
+
+<h1>
+
+${token.nombre || "Token"}
+
+$${token.ticker || ""}
+
+</h1>
+
+
+
+
+<h2 class="score">
+
+Score ${token.score || 0}/100
+
+</h2>
+
+
+
+
+<p>
+
+<b>CA:</b>
+
+${token.mint || ""}
+
+</p>
+
+
+
+
+<p>
+
+<b>Volumen 24H:</b>
+
+$${token.volumen || 0}
+
+</p>
+
+
+
+
+<p>
+
+<b>Liquidez:</b>
+
+$${token.liquidez || 0}
+
+</p>
+
+
+
+
+
+<div class="buttons">
+
+
+
+<button onclick="copiarCA('${token.mint}')">
+
+📋 Copiar CA
+
+</button>
+
+
+
+
+
+<button onclick="abrirLink('${token.original}')">
+
+🚀 Abrir Original
+
+</button>
+
+
+
+
+
+<button onclick="buscarOtra()">
+
+🔄 Buscar Otra
+
+</button>
+
+
+
+
+
+${token.x ? `
+
+<button onclick="abrirLink('${token.x}')">
+
+𝕏 Ver X
+
+</button>
+
+`:''}
+
+
+
+
+
+${
+token.web ?
+
+`
+
+<button onclick="abrirLink('${token.web}')">
+
+🌐 Ver Web
+
+</button>
+
+`
+
+:''
+
+}
+
+
+
+</div>
+
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+
+
+
+
+// =============================
+// RANKING
+// =============================
+
+
+function actualizarRanking(){
+
+
+fetch(`${API_URL}/ranking?t=${Date.now()}`)
+
+
+.then(response=>response.json())
+
+
+.then(data=>{
+
+
+let html="";
+
+
+data.forEach(token=>{
+
+
+html += crearCardToken(token);
+
+
+});
+
+
+
+document.getElementById("ranking").innerHTML = html;
+
+
+
+})
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+});
+
+}
+
+
+
+
+
+
+// =============================
+// UTILIDADES
+// =============================
+
+
 function copiarCA(ca){
 
 
-    navigator.clipboard.writeText(ca);
+navigator.clipboard.writeText(ca);
 
 
-    alert(
-        "CA copiado"
-    );
+alert("CA copiado");
+
+
+}
+
+
+
+
+
+function abrirLink(url){
+
+
+if(url){
+
+window.open(url,"_blank");
+
+}
+
+
+}
+
+
+
+
+function mostrarSinResultado(){
+
+
+document.getElementById("recomendacion").innerHTML=
+
+`
+
+<div class="card">
+
+<h2>
+❌ No se encontraron oportunidades
+</h2>
+
+<button onclick="buscarOtra()">
+
+🔄 Intentar nuevamente
+
+</button>
+
+</div>
+
+`;
 
 }
