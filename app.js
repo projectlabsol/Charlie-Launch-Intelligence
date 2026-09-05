@@ -183,131 +183,185 @@ function mostrarRecomendacion(token){
 
 
 
-function crearCardToken(token,recomendado=false){
+function crearCardToken(token, recomendado=false){
 
 
-return `
+    if(!token || !token.mint){
 
+        return `
 
-<div class="card token-card">
+        <div class="card">
 
+            <h2>❌ Sin oportunidad encontrada</h2>
 
+            <p>
+            El scanner no encontró una moneda válida en este escaneo.
+            </p>
 
-${token.imagen ? `
 
-<img 
-src="${token.imagen}"
-class="token-image">
+            <button onclick="buscarOtra()">
+            🔄 Buscar Otra
+            </button>
 
-`:""}
 
+        </div>
 
+        `;
 
-<h2>
+    }
 
-${recomendado ? "🚀 Recomendación de Lanzamiento" : ""}
 
-</h2>
 
+    return `
 
+    <div class="card token-card">
 
-<h1>
 
-${token.nombre || "Token"}
+        ${
+        recomendado
+        ?
+        `<h2>🚀 Recomendación de Lanzamiento</h2>`
+        :
+        ""
+        }
 
-$${token.ticker || ""}
 
-</h1>
 
+        <img
 
+        src="${token.imagen || 'https://placehold.co/200'}"
 
+        class="token-image"
 
-<h2 class="score">
+        >
 
-Score ${token.score || 0}/100
 
-</h2>
 
+        <h1>
 
+        ${token.nombre || "Token"}
 
+        $${token.ticker || ""}
 
-<p>
+        </h1>
 
-<b>CA:</b>
 
-${token.mint || ""}
 
-</p>
 
+        <h2>
 
+        Score ${token.score || 0}/100
 
+        </h2>
 
-<p>
 
-<b>Volumen 24H:</b>
 
-$${token.volumen || 0}
 
-</p>
+        <p>
 
+        CA:
 
+        ${token.mint}
 
+        </p>
 
-<p>
 
-<b>Liquidez:</b>
 
-$${token.liquidez || 0}
 
-</p>
+        <p>
 
+        Volumen 24H:
 
+        $${token.volumen || 0}
 
+        </p>
 
 
-<div class="buttons">
 
 
+        <p>
 
-<button onclick="copiarCA('${token.mint}')">
+        Liquidez:
 
-📋 Copiar CA
+        $${token.liquidez || 0}
 
-</button>
+        </p>
 
 
 
 
+        <div class="buttons">
 
-<button onclick="abrirLink('${token.original}')">
 
-🚀 Abrir Original
+            <button onclick="copiarCA('${token.mint}')">
 
-</button>
+            📋 Copiar CA
 
+            </button>
 
 
 
+            <button onclick="abrirLink('${token.original}')">
 
-<button onclick="buscarOtra()">
+            🚀 Abrir Original
 
-🔄 Buscar Otra
+            </button>
 
-</button>
 
 
+            <button onclick="buscarOtra()">
 
+            🔄 Buscar Otra
 
+            </button>
 
-${token.x ? `
 
-<button onclick="abrirLink('${token.x}')">
 
-𝕏 Ver X
+            ${
+            token.x
+            ?
+            `
 
-</button>
+            <button onclick="abrirLink('${token.x}')">
 
-`:''}
+            𝕏 Ver X
+
+            </button>
+
+            `
+            :
+            ""
+            }
+
+
+
+            ${
+            token.web
+            ?
+            `
+
+            <button onclick="abrirLink('${token.web}')">
+
+            🌐 Ver Web
+
+            </button>
+
+            `
+            :
+            ""
+            }
+
+
+        </div>
+
+
+
+    </div>
+
+
+    `;
+
+}
 
 
 
