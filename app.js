@@ -1,26 +1,36 @@
 const API_URL = "https://charlie-launch-intelligence.onrender.com";
 
 
+
 function analizarToken(){
 
     const ticker = document.getElementById("ticker").value;
 
+
     if(!ticker){
+
         alert("Ingrese un ticker");
+
         return;
+
     }
 
+
     fetch(`${API_URL}/analizar/${ticker.toUpperCase()}`)
+
     .then(response => response.json())
+
     .then(data => {
 
         mostrarResultado(data);
 
     })
+
     .catch(error => {
 
         console.log(error);
-        alert("No se pudo conectar con el motor de análisis");
+
+        alert("No se pudo conectar con el motor");
 
     });
 
@@ -28,33 +38,142 @@ function analizarToken(){
 
 
 
+
+
 function mostrarResultado(data){
+
 
     const resultado = document.getElementById("resultado");
 
+
     resultado.innerHTML = `
 
-    <div class="card">
 
-        <h3>${data.nombre || "Token analizado"}</h3>
+    <div class="card token-card">
 
-        <p><b>Ticker:</b> ${data.ticker}</p>
 
-        <h2>Score: ${data.score}/100</h2>
+        ${data.imagen ? 
 
-        <h3>${estadoScore(data.score)}</h3>
+        `<img src="${data.imagen}" class="token-image">`
 
-        <hr>
+        :
 
-        <p>Volumen: ${data.volumen}</p>
+        ""
 
-        <p>Comunidad: ${data.comunidad}</p>
+        }
 
-        <p>Viralidad: ${data.viralidad}</p>
 
-        <p>Seguridad: ${data.seguridad}</p>
+
+        <h2>
+
+        ${data.nombre || "Token"}
+
+        <span>
+
+        $${data.ticker || ""}
+
+        </span>
+
+        </h2>
+
+
+
+        <h1>
+
+        Score: ${data.score}/100
+
+        </h1>
+
+
+
+        <p>
+
+        CA:
+
+        ${data.mint || ""}
+
+        </p>
+
+
+
+        <p>
+
+        Volumen 24H:
+
+        $${data.volumen || 0}
+
+        </p>
+
+
+
+        <p>
+
+        Liquidez:
+
+        $${data.liquidez || 0}
+
+        </p>
+
+
+
+
+        <div class="buttons">
+
+
+        <button onclick="copiarCA('${data.mint}')">
+
+        📋 Copiar CA
+
+        </button>
+
+
+
+        <button onclick="window.open('${data.original}')">
+
+        🚀 Abrir Original
+
+        </button>
+
+
+
+
+        ${data.x ?
+
+        `<button onclick="window.open('${data.x}')">
+
+        𝕏 Ver X
+
+        </button>`
+
+        :
+
+        ""
+
+        }
+
+
+
+        ${data.web && data.web.length ?
+
+        `<button onclick="window.open('${data.web[0]}')">
+
+        🌐 Ver Web
+
+        </button>`
+
+        :
+
+        ""
+
+        }
+
+
+
+        </div>
+
 
     </div>
+
 
     `;
 
@@ -62,157 +181,246 @@ function mostrarResultado(data){
 
 
 
-function estadoScore(score){
-
-    if(score >= 85){
-
-        return "🟢 Alta oportunidad";
-
-    }
 
 
-    if(score >= 70){
-
-        return "🟡 Analizar más";
-
-    }
+function recomendarLanzamiento(){
 
 
-    return "🔴 No recomendado";
+    fetch(`${API_URL}/recomendar`)
+
+
+    .then(response => response.json())
+
+
+    .then(data => {
+
+
+        mostrarRecomendacion(
+            data.recomendacion
+        );
+
+
+    })
+
+
+    .catch(error=>{
+
+
+        console.log(error);
+
+
+        alert(
+            "Error buscando oportunidad"
+        );
+
+
+    });
+
 
 }
 
 
 
 
-function actualizarRanking(){
 
-    fetch(`${API_URL}/ranking`)
-    .then(response => response.json())
-    .then(data => {
+function buscarOtra(){
 
 
-        const ranking = document.getElementById("ranking");
+    recomendarLanzamiento();
 
 
-        ranking.innerHTML = `
+}
+
+
+
+
+
+function mostrarRecomendacion(token){
+
+
+    const recomendacion =
+    document.getElementById(
+        "recomendacion"
+    );
+
+
+
+    if(!token){
+
+
+        recomendacion.innerHTML = `
 
         <div class="card">
 
-            <h2>Ranking de oportunidades</h2>
-
-            ${data.map(token => `
-
-                <div>
-
-                    <h3>${token.nombre}</h3>
-
-                    <p>
-                    ${token.ticker}
-                    </p>
-
-                    <p>
-                    Score: ${token.score}/100
-                    </p>
-
-                    <hr>
-
-                </div>
-
-            `).join("")}
+        ❌ Sin oportunidades
 
         </div>
 
         `;
 
 
-    })
-    .catch(error=>{
+        return;
 
-        console.log(error);
+    }
 
-        alert("Error cargando ranking");
 
-    });
+
+
+    recomendacion.innerHTML = `
+
+
+    <div class="card token-card">
+
+
+        <h2>
+
+        🚀 Recomendación de Lanzamiento
+
+        </h2>
+
+
+
+        <img 
+
+        src="${token.imagen || ''}"
+
+        class="token-image"
+
+        >
+
+
+
+        <h1>
+
+        ${token.nombre}
+
+        $${token.ticker}
+
+        </h1>
+
+
+
+
+        <h2>
+
+        Score ${token.score}/100
+
+        </h2>
+
+
+
+
+        <p>
+
+        Volumen 24H:
+
+        $${token.volumen}
+
+        </p>
+
+
+
+        <p>
+
+        Liquidez:
+
+        $${token.liquidez}
+
+        </p>
+
+
+
+        <p>
+
+        CA:
+
+        ${token.mint}
+
+        </p>
+
+
+
+        <button onclick="copiarCA('${token.mint}')">
+
+        📋 Copiar CA
+
+        </button>
+
+
+
+        <button onclick="window.open('${token.original}')">
+
+        🚀 Abrir Original
+
+        </button>
+
+
+
+
+        <button onclick="buscarOtra()">
+
+        🔄 Buscar Otra
+
+        </button>
+
+
+
+
+        ${
+        token.x ?
+
+        `<button onclick="window.open('${token.x}')">
+
+        𝕏 Ver X
+
+        </button>`
+
+        :
+
+        ""
+
+        }
+
+
+
+
+        ${
+        token.web && token.web.length ?
+
+        `<button onclick="window.open('${token.web[0]}')">
+
+        🌐 Ver Web
+
+        </button>`
+
+        :
+
+        ""
+
+        }
+
+
+
+    </div>
+
+
+    `;
+
 
 }
 
 
 
 
-function recomendarLanzamiento(){
 
-    fetch(`${API_URL}/recomendar`)
-    .then(response => response.json())
-    .then(data => {
+function copiarCA(ca){
 
 
-        const recomendacion = document.getElementById("recomendacion");
+    navigator.clipboard.writeText(ca);
 
 
-        if(data.recomendaciones.length === 0){
-
-            recomendacion.innerHTML = `
-
-            <div class="card">
-
-            <h2>❌ No hay lanzamientos recomendados</h2>
-
-            </div>
-
-            `;
-
-            return;
-
-        }
-
-
-
-        let html = "";
-
-
-        data.recomendaciones.forEach(token=>{
-
-
-            html += `
-
-            <div class="card">
-
-                <h2>🚀 ${token.token}</h2>
-
-                <p>
-                Ticker: ${token.ticker}
-                </p>
-
-                <h3>
-                ${token.decision}
-                </h3>
-
-                <p>
-                Score: ${token.score}/100
-                </p>
-
-            </div>
-
-            `;
-
-
-        });
-
-
-
-        recomendacion.innerHTML = html;
-
-
-
-    })
-    .catch(error=>{
-
-        console.log(error);
-
-        alert("Error conectando con el servidor");
-
-    });
-
+    alert(
+        "CA copiado"
+    );
 
 }
