@@ -13,6 +13,10 @@ class LiveScanner:
             "https://api.dexscreener.com/latest/dex/search?q=solana"
         ]
 
+        self.vistos = set()
+
+
+
 
 
     def escanear_pumpfun(self):
@@ -21,20 +25,29 @@ class LiveScanner:
 
 
 
+
+
+
+
     def escanear_mercado(self):
 
+
         tokens = []
-        vistos = set()
 
 
         for url in self.urls:
 
+
             try:
 
-                data = requests.get(
+
+                response = requests.get(
                     url,
                     timeout=20
-                ).json()
+                )
+
+
+                data = response.json()
 
 
                 for pair in data.get("pairs", []):
@@ -52,30 +65,31 @@ class LiveScanner:
 
 
                     if not mint:
+
                         continue
 
 
-                    if mint in vistos:
+
+                    if mint in self.vistos:
+
                         continue
 
 
-                    vistos.add(mint)
 
-
-
-                    ticker = base.get(
+                    symbol = base.get(
                         "symbol",
                         ""
                     )
 
 
-                    if ticker.upper() in [
+                    if symbol.upper() in [
                         "SOL",
                         "USDC",
                         "USDT",
                         "WETH",
                         "WBTC"
                     ]:
+
                         continue
 
 
@@ -92,19 +106,23 @@ class LiveScanner:
                         "nombre":
                         base.get(
                             "name",
-                            ""
+                            "Unknown"
                         ),
 
+
                         "ticker":
-                        ticker,
+                        symbol,
+
 
                         "mint":
                         mint,
+
 
                         "imagen":
                         info.get(
                             "imageUrl"
                         ),
+
 
                         "volumen24h":
                         float(
@@ -117,6 +135,7 @@ class LiveScanner:
                             )
                         ),
 
+
                         "liquidez":
                         float(
                             pair.get(
@@ -128,32 +147,75 @@ class LiveScanner:
                             )
                         ),
 
+
                         "original":
                         "https://pump.fun/" + mint,
+
+
+                        "dex":
+                        pair.get(
+                            "url"
+                        ),
+
 
                         "web":
                         None,
 
+
                         "x":
                         None
+
                     }
 
 
 
-                    for s in info.get(
+
+
+                    for website in info.get(
+                        "websites",
+                        []
+                    ):
+
+
+                        if website.get(
+                            "url"
+                        ):
+
+                            token["web"] = website["url"]
+
+                            break
+
+
+
+
+
+                    for social in info.get(
                         "socials",
                         []
                     ):
 
-                        if s.get("type") in [
+
+                        if social.get(
+                            "type"
+                        ) in [
                             "twitter",
                             "x"
                         ]:
 
-                            token["x"] = s.get(
+
+                            token["x"] = social.get(
                                 "url"
                             )
 
+                            break
+
+
+
+
+
+                    token["meta"] = self.detectar_meta(
+                        token
+                    )
 
 
                     token["score"] = self.calcular_score(
@@ -161,22 +223,100 @@ class LiveScanner:
                     )
 
 
-                    token["meta"] = "Meme"
-
-
-
                     tokens.append(
                         token
                     )
 
 
+
             except Exception as e:
 
-                print(e)
+                print(
+                    "Scanner:",
+                    e
+                )
 
 
 
         return tokens
+
+
+
+
+
+
+
+    def detectar_meta(
+        self,
+        token
+    ):
+
+
+        texto = (
+
+            token.get(
+                "nombre",
+                ""
+            )
+            +
+            " "
+            +
+            token.get(
+                "ticker",
+                ""
+            )
+
+        ).lower()
+
+
+
+        if any(x in texto for x in [
+            "ai",
+            "agent",
+            "gpt",
+            "bot"
+        ]):
+
+            return "AI"
+
+
+
+        if any(x in texto for x in [
+            "dog",
+            "cat",
+            "frog",
+            "ape"
+        ]):
+
+            return "Animal"
+
+
+
+        if any(x in texto for x in [
+            "game",
+            "gaming",
+            "play"
+        ]):
+
+            return "Gaming"
+
+
+
+        if any(x in texto for x in [
+            "pepe",
+            "meme",
+            "elon"
+        ]):
+
+            return "Viral"
+
+
+
+        return "Meme"
+
+
+
+
 
 
 
@@ -190,45 +330,76 @@ class LiveScanner:
         score = 0
 
 
-        if token["volumen24h"] >= 1000000:
+
+        volumen = token.get(
+            "volumen24h",
+            0
+        )
+
+
+        liquidez = token.get(
+            "liquidez",
+            0
+        )
+
+
+
+        if volumen >= 1000000:
 
             score += 40
 
-        elif token["volumen24h"] >= 100000:
+        elif volumen >= 100000:
 
             score += 30
 
-        else:
+        elif volumen >= 50000:
 
             score += 20
 
 
 
-        if token["liquidez"] >= 100000:
+        if liquidez >= 100000:
 
             score += 30
 
-        elif token["liquidez"] >= 10000:
+        elif liquidez >= 10000:
 
             score += 20
 
-        else:
+
+
+        if token.get(
+            "imagen"
+        ):
 
             score += 10
 
 
 
-        if token.get("imagen"):
+        if token.get(
+            "x"
+        ):
 
             score += 10
 
 
-        if token.get("x"):
+
+        if token.get(
+            "web"
+        ):
 
             score += 10
 
 
-        return min(score,100)
+
+        return min(
+            score,
+            100
+        )
+
+
+
+
 
 
 
@@ -255,24 +426,55 @@ class LiveScanner:
 
 
 
+        tokens = [
+
+            t for t in tokens
+
+            if t["volumen24h"] >= 50000
+
+            and t["liquidez"] >= 10000
+
+        ]
+
+
+
         if not tokens:
 
             return {
+
                 "mensaje":
                 "Sin oportunidades"
+
             }
 
 
 
         tokens.sort(
-            key=lambda x:x["score"],
+
+            key=lambda x:(
+
+                x["score"],
+
+                x["volumen24h"],
+
+                x["liquidez"]
+
+            ),
+
             reverse=True
+
         )
 
 
-        mejores = tokens[:20]
 
-
-        return random.choice(
-            mejores
+        elegido = random.choice(
+            tokens[:10]
         )
+
+
+        self.vistos.add(
+            elegido["mint"]
+        )
+
+
+        return elegido
