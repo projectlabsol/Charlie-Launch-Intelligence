@@ -1,6 +1,9 @@
 import requests
 import os
 
+from backend.engine.relaunch_engine import RelaunchEngine
+
+
 
 class LiveScanner:
 
@@ -11,17 +14,24 @@ class LiveScanner:
             "HELIUS_API_KEY"
         )
 
+
         self.helius_rpc = (
             "https://mainnet.helius-rpc.com/?api-key="
             + str(self.helius_key)
         )
 
 
+        self.engine = RelaunchEngine()
+
+
+
+
 
     def escanear_pumpfun(self):
 
-        # Pendiente conexión directa Pump.fun API
+        # Próxima conexión directa Pump.fun
         return []
+
 
 
 
@@ -29,10 +39,12 @@ class LiveScanner:
 
     def escanear_mercado(self):
 
+
         tokens = []
 
 
         try:
+
 
             url = (
                 "https://api.dexscreener.com/latest/dex/search?q=solana"
@@ -80,11 +92,6 @@ class LiveScanner:
                 )
 
 
-                nombre = base.get(
-                    "name",
-                    ""
-                )
-
 
                 ticker = base.get(
                     "symbol",
@@ -110,19 +117,29 @@ class LiveScanner:
                 token = {
 
 
-                    "nombre": nombre,
+                    "nombre":
+                    base.get(
+                        "name",
+                        ""
+                    ),
 
 
-                    "ticker": ticker,
+
+                    "ticker":
+                    ticker,
 
 
-                    "mint": mint,
+
+                    "mint":
+                    mint,
+
 
 
                     "imagen":
                     info.get(
                         "imageUrl"
                     ),
+
 
 
                     "volumen24h":
@@ -137,6 +154,7 @@ class LiveScanner:
                     ),
 
 
+
                     "liquidez":
                     float(
                         pair.get(
@@ -149,18 +167,30 @@ class LiveScanner:
                     ),
 
 
+
                     "original":
+                    "https://pump.fun/" + mint,
+
+
+
+                    "dex":
                     pair.get(
                         "url"
                     ),
 
 
-                    "web": None,
+
+                    "web":
+                    None,
 
 
-                    "x": None
+
+                    "x":
+                    None
 
                 }
+
+
 
 
 
@@ -178,6 +208,8 @@ class LiveScanner:
 
 
 
+
+
                 socials = info.get(
                     "socials",
                     []
@@ -185,6 +217,7 @@ class LiveScanner:
 
 
                 for social in socials:
+
 
                     if social.get(
                         "type"
@@ -197,6 +230,11 @@ class LiveScanner:
                             "url"
                         )
 
+
+
+                token["meta"] = self.analizar_meta(
+                    token
+                )
 
 
                 tokens.append(
@@ -214,6 +252,7 @@ class LiveScanner:
 
 
         return tokens
+
 
 
 
@@ -238,46 +277,54 @@ class LiveScanner:
 
 
 
-        if any(x in texto for x in [
-            "ai",
-            "agent",
-            "gpt",
-            "bot"
-        ]):
-
-            return "AI"
+        categorias = {
 
 
-
-        if any(x in texto for x in [
-            "game",
-            "gaming",
-            "play"
-        ]):
-
-            return "Gaming"
-
+            "AI":
+            [
+                "ai",
+                "agent",
+                "gpt",
+                "bot"
+            ],
 
 
-        if any(x in texto for x in [
-            "dog",
-            "cat",
-            "frog",
-            "ape"
-        ]):
-
-            return "Animal"
+            "Gaming":
+            [
+                "game",
+                "gaming",
+                "play"
+            ],
 
 
+            "Animal":
+            [
+                "dog",
+                "cat",
+                "frog",
+                "ape"
+            ],
 
-        if any(x in texto for x in [
-            "pepe",
-            "meme",
-            "doge",
-            "elon"
-        ]):
 
-            return "Viral"
+            "Viral":
+            [
+                "pepe",
+                "meme",
+                "doge",
+                "elon"
+            ]
+
+        }
+
+
+
+        for meta,palabras in categorias.items():
+
+            for palabra in palabras:
+
+                if palabra in texto:
+
+                    return meta
 
 
 
@@ -295,103 +342,9 @@ class LiveScanner:
     ):
 
 
-        score = 0
-
-
-
-        volumen = token.get(
-            "volumen24h",
-            0
-        )
-
-
-        liquidez = token.get(
-            "liquidez",
-            0
-        )
-
-
-
-        # Momentum
-
-        if volumen > 1000000:
-
-            score += 35
-
-        elif volumen > 100000:
-
-            score += 25
-
-        elif volumen > 10000:
-
-            score += 15
-
-
-
-        # Liquidez
-
-        if liquidez > 100000:
-
-            score += 25
-
-        elif liquidez > 10000:
-
-            score += 15
-
-
-
-        # Identidad
-
-        if token.get(
-            "imagen"
-        ):
-
-            score += 10
-
-
-
-        if token.get(
-            "x"
-        ):
-
-            score += 10
-
-
-
-        if token.get(
-            "web"
-        ):
-
-            score += 5
-
-
-
-        meta = self.analizar_meta(
+        return self.engine.evaluar(
             token
-        )
-
-
-        token["meta"] = meta
-
-
-
-        if meta in [
-            "AI",
-            "Gaming",
-            "Viral"
-        ]:
-
-            score += 15
-
-
-
-        token["score"] = min(
-            score,
-            100
-        )
-
-
-        return token["score"]
+        )["score"]
 
 
 
@@ -399,8 +352,11 @@ class LiveScanner:
 
 
 
+    def recomendar(
+        self,
+        excluir=None
+    ):
 
-    def recomendar(self):
 
 
         tokens = []
@@ -417,16 +373,38 @@ class LiveScanner:
 
 
 
+        candidatos = []
+
+
+
         for token in tokens:
 
-            self.analizar_score(
+
+            if excluir and token.get(
+                "mint"
+            ) == excluir:
+
+                continue
+
+
+
+            token = self.engine.evaluar(
                 token
             )
 
 
+            if token["score"] >= 50:
 
-        tokens.sort(
-            key=lambda x: (
+                candidatos.append(
+                    token
+                )
+
+
+
+
+
+        candidatos.sort(
+            key=lambda x:(
                 x.get(
                     "score",
                     0
@@ -445,9 +423,11 @@ class LiveScanner:
 
 
 
-        if tokens:
 
-            return tokens[0]
+
+        if candidatos:
+
+            return candidatos[0]
 
 
 
