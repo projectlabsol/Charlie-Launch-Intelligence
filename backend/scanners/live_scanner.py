@@ -1,5 +1,6 @@
 import requests
 import os
+import time
 
 
 class LiveScanner:
@@ -11,20 +12,22 @@ class LiveScanner:
             "HELIUS_API_KEY"
         )
 
+
         self.helius_rpc = (
             "https://mainnet.helius-rpc.com/?api-key="
             + str(self.helius_key)
         )
 
 
+        # memoria temporal de sesión
+        self.mostrados = set()
+
+
 
     def escanear_pumpfun(self):
 
-        tokens = []
+        return []
 
-        # Próxima integración directa Pump.fun
-
-        return tokens
 
 
 
@@ -35,6 +38,7 @@ class LiveScanner:
 
 
         try:
+
 
             url = (
                 "https://api.dexscreener.com/latest/dex/search?q=pump"
@@ -73,13 +77,35 @@ class LiveScanner:
 
 
 
+                mint = base.get(
+                    "address"
+                )
+
+
+                if not mint:
+
+                    continue
+
+
+
+                # evitar repetidos
+
+                if mint in self.mostrados:
+
+                    continue
+
+
+
+
                 token = {
+
 
                     "nombre":
                     base.get(
                         "name",
                         "Unknown"
                     ),
+
 
 
                     "ticker":
@@ -89,10 +115,10 @@ class LiveScanner:
                     ),
 
 
+
                     "mint":
-                    base.get(
-                        "address"
-                    ),
+                    mint,
+
 
 
                     "imagen":
@@ -101,55 +127,67 @@ class LiveScanner:
                     ),
 
 
-                    "web":
-                    [],
-
-
-                    "x":
-                    None,
-
 
                     "volumen":
-                    pair.get(
-                        "volume",
-                        {}
-                    ).get(
-                        "h24",
-                        0
+                    float(
+                        pair.get(
+                            "volume",
+                            {}
+                        ).get(
+                            "h24",
+                            0
+                        )
                     ),
+
 
 
                     "liquidez":
-                    pair.get(
-                        "liquidity",
-                        {}
-                    ).get(
-                        "usd",
-                        0
+                    float(
+                        pair.get(
+                            "liquidity",
+                            {}
+                        ).get(
+                            "usd",
+                            0
+                        )
                     ),
+
 
 
                     "original":
                     pair.get(
                         "url"
-                    )
+                    ),
+
+
+
+                    "web":
+                    [],
+
+
+
+                    "x":
+                    None
+
 
                 }
 
 
 
-                # Extraer web y redes sociales
-
-                for item in info.get(
+                for site in info.get(
                     "websites",
                     []
                 ):
 
-                    if item.get("url"):
+
+                    if site.get(
+                        "url"
+                    ):
 
                         token["web"].append(
-                            item["url"]
+                            site["url"]
                         )
+
 
 
 
@@ -158,7 +196,11 @@ class LiveScanner:
                     []
                 ):
 
-                    if social.get("type") == "twitter":
+
+                    if social.get(
+                        "type"
+                    ) == "twitter":
+
 
                         token["x"] = social.get(
                             "url"
@@ -174,6 +216,7 @@ class LiveScanner:
 
         except Exception as e:
 
+
             print(
                 "Dex error:",
                 e
@@ -187,32 +230,32 @@ class LiveScanner:
 
 
 
-    def analizar_score(self, token):
+    def analizar_score(
+        self,
+        token
+    ):
+
 
         score = 0
 
 
 
-        volumen = float(
-            token.get(
-                "volumen",
-                0
-            )
+        volumen = token.get(
+            "volumen",
+            0
         )
 
 
-        liquidez = float(
-            token.get(
-                "liquidez",
-                0
-            )
+        liquidez = token.get(
+            "liquidez",
+            0
         )
 
 
 
         if volumen >= 100000:
 
-            score += 30
+            score += 35
 
         elif volumen >= 10000:
 
@@ -220,10 +263,9 @@ class LiveScanner:
 
 
 
-
         if liquidez >= 50000:
 
-            score += 25
+            score += 30
 
         elif liquidez >= 5000:
 
@@ -240,18 +282,6 @@ class LiveScanner:
 
 
 
-        if len(
-            token.get(
-                "web",
-                []
-            )
-        ) > 0:
-
-            score += 15
-
-
-
-
         if token.get(
             "x"
         ):
@@ -260,17 +290,8 @@ class LiveScanner:
 
 
 
-
         if token.get(
-            "nombre"
-        ):
-
-            score += 5
-
-
-
-        if token.get(
-            "ticker"
+            "web"
         ):
 
             score += 5
@@ -287,17 +308,16 @@ class LiveScanner:
 
 
 
+
     def recomendar(self):
 
 
         tokens = []
 
 
-
         tokens.extend(
             self.escanear_pumpfun()
         )
-
 
 
         tokens.extend(
@@ -308,15 +328,22 @@ class LiveScanner:
 
         for token in tokens:
 
+
             token["score"] = self.analizar_score(
                 token
             )
 
 
 
-        # Filtrar oportunidades reales
+        tokens.sort(
+            key=lambda x:(
+                x["score"],
+                x["volumen"],
+                x["liquidez"]
+            ),
+            reverse=True
+        )
 
-        candidatos = []
 
 
         for token in tokens:
@@ -324,26 +351,14 @@ class LiveScanner:
 
             if token["score"] >= 60:
 
-                candidatos.append(
-                    token
+
+                self.mostrados.add(
+                    token["mint"]
                 )
 
 
+                return token
 
-        candidatos.sort(
-            key=lambda x:x.get(
-                "score",
-                0
-            ),
-            reverse=True
-        )
-
-
-
-        if candidatos:
-
-
-            return candidatos[0]
 
 
 
