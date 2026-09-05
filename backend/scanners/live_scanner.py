@@ -1,9 +1,6 @@
 import requests
 import os
 
-from backend.engine.relaunch_engine import RelaunchEngine
-
-
 
 class LiveScanner:
 
@@ -21,16 +18,111 @@ class LiveScanner:
         )
 
 
-        self.engine = RelaunchEngine()
-
-
 
 
 
     def escanear_pumpfun(self):
 
-        # Próxima conexión directa Pump.fun
-        return []
+        tokens = []
+
+
+        try:
+
+            url = (
+                "https://frontend-api.pump.fun/coins"
+                "?offset=0&limit=50"
+                "&sort=created_timestamp"
+                "&order=DESC"
+            )
+
+
+            response = requests.get(
+                url,
+                timeout=20
+            )
+
+
+            data = response.json()
+
+
+
+            for item in data:
+
+
+                mint = item.get(
+                    "mint"
+                )
+
+
+                if not mint:
+                    continue
+
+
+
+                tokens.append({
+
+                    "nombre":
+                    item.get(
+                        "name",
+                        ""
+                    ),
+
+
+                    "ticker":
+                    item.get(
+                        "symbol",
+                        ""
+                    ),
+
+
+                    "mint":
+                    mint,
+
+
+                    "imagen":
+                    item.get(
+                        "image_uri"
+                    ),
+
+
+                    "volumen24h":
+                    0,
+
+
+                    "liquidez":
+                    0,
+
+
+                    "original":
+                    "https://pump.fun/" + mint,
+
+
+                    "dex":
+                    None,
+
+
+                    "web":
+                    None,
+
+
+                    "x":
+                    None
+
+                })
+
+
+
+        except Exception as e:
+
+            print(
+                "PumpFun error:",
+                e
+            )
+
+
+        return tokens
+
+
 
 
 
@@ -67,16 +159,6 @@ class LiveScanner:
 
 
 
-            bloqueados = [
-                "SOL",
-                "USDC",
-                "USDT",
-                "WETH",
-                "WBTC"
-            ]
-
-
-
             for pair in pairs:
 
 
@@ -86,20 +168,20 @@ class LiveScanner:
                 )
 
 
-                info = pair.get(
-                    "info",
-                    {}
-                )
-
-
-
                 ticker = base.get(
                     "symbol",
                     ""
                 )
 
 
-                if ticker.upper() in bloqueados:
+                if ticker.upper() in [
+                    "SOL",
+                    "USDC",
+                    "USDT",
+                    "WBTC",
+                    "WETH"
+                ]:
+
                     continue
 
 
@@ -114,8 +196,14 @@ class LiveScanner:
 
 
 
-                token = {
+                info = pair.get(
+                    "info",
+                    {}
+                )
 
+
+
+                tokens.append({
 
                     "nombre":
                     base.get(
@@ -124,22 +212,18 @@ class LiveScanner:
                     ),
 
 
-
                     "ticker":
                     ticker,
-
 
 
                     "mint":
                     mint,
 
 
-
                     "imagen":
                     info.get(
                         "imageUrl"
                     ),
-
 
 
                     "volumen24h":
@@ -154,7 +238,6 @@ class LiveScanner:
                     ),
 
 
-
                     "liquidez":
                     float(
                         pair.get(
@@ -167,10 +250,8 @@ class LiveScanner:
                     ),
 
 
-
                     "original":
                     "https://pump.fun/" + mint,
-
 
 
                     "dex":
@@ -179,156 +260,26 @@ class LiveScanner:
                     ),
 
 
-
                     "web":
                     None,
-
 
 
                     "x":
                     None
 
-                }
-
-
-
-
-
-                websites = info.get(
-                    "websites",
-                    []
-                )
-
-
-                if websites:
-
-                    token["web"] = websites[0].get(
-                        "url"
-                    )
-
-
-
-
-
-                socials = info.get(
-                    "socials",
-                    []
-                )
-
-
-                for social in socials:
-
-
-                    if social.get(
-                        "type"
-                    ) in [
-                        "twitter",
-                        "x"
-                    ]:
-
-                        token["x"] = social.get(
-                            "url"
-                        )
-
-
-
-                token["meta"] = self.analizar_meta(
-                    token
-                )
-
-
-                tokens.append(
-                    token
-                )
-
+                })
 
 
         except Exception as e:
 
             print(
-                "Scanner error:",
+                "Dex error:",
                 e
             )
 
 
         return tokens
 
-
-
-
-
-
-
-    def analizar_meta(
-        self,
-        token
-    ):
-
-
-        texto = (
-
-            str(token.get("nombre",""))
-            +
-            " "
-            +
-            str(token.get("ticker",""))
-
-        ).lower()
-
-
-
-        categorias = {
-
-
-            "AI":
-            [
-                "ai",
-                "agent",
-                "gpt",
-                "bot"
-            ],
-
-
-            "Gaming":
-            [
-                "game",
-                "gaming",
-                "play"
-            ],
-
-
-            "Animal":
-            [
-                "dog",
-                "cat",
-                "frog",
-                "ape"
-            ],
-
-
-            "Viral":
-            [
-                "pepe",
-                "meme",
-                "doge",
-                "elon"
-            ]
-
-        }
-
-
-
-        for meta,palabras in categorias.items():
-
-            for palabra in palabras:
-
-                if palabra in texto:
-
-                    return meta
-
-
-
-        return "Meme"
 
 
 
@@ -342,9 +293,60 @@ class LiveScanner:
     ):
 
 
-        return self.engine.evaluar(
-            token
-        )["score"]
+        score = 0
+
+
+
+        volumen = token.get(
+            "volumen24h",
+            0
+        )
+
+
+        liquidez = token.get(
+            "liquidez",
+            0
+        )
+
+
+
+        if volumen > 1000000:
+
+            score += 40
+
+        elif volumen > 100000:
+
+            score += 25
+
+        elif volumen > 10000:
+
+            score += 15
+
+
+
+        if liquidez > 100000:
+
+            score += 30
+
+        elif liquidez > 10000:
+
+            score += 15
+
+
+
+        if token.get(
+            "imagen"
+        ):
+
+            score += 10
+
+
+
+        return min(
+            score,
+            100
+        )
+
 
 
 
@@ -356,7 +358,6 @@ class LiveScanner:
         self,
         excluir=None
     ):
-
 
 
         tokens = []
@@ -373,42 +374,24 @@ class LiveScanner:
 
 
 
-        candidatos = []
-
-
-
         for token in tokens:
 
-
-            if excluir and token.get(
-                "mint"
-            ) == excluir:
-
-                continue
-
-
-
-            token = self.engine.evaluar(
+            token["score"] = self.analizar_score(
                 token
             )
 
 
-            if token["score"] >= 50:
 
-                candidatos.append(
-                    token
-                )
-
-
+        tokens = [
+            x for x in tokens
+            if x["score"] >= 40
+        ]
 
 
 
-        candidatos.sort(
-            key=lambda x:(
-                x.get(
-                    "score",
-                    0
-                ),
+        tokens.sort(
+            key=lambda x: (
+                x["score"],
                 x.get(
                     "volumen24h",
                     0
@@ -423,11 +406,9 @@ class LiveScanner:
 
 
 
+        if tokens:
 
-
-        if candidatos:
-
-            return candidatos[0]
+            return tokens[0]
 
 
 
