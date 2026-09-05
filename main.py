@@ -9,6 +9,7 @@ app = FastAPI(
 )
 
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,7 +18,10 @@ app.add_middleware(
 )
 
 
+
 scanner = LiveScanner()
+
+
 
 
 
@@ -25,34 +29,104 @@ scanner = LiveScanner()
 def inicio():
 
     return {
-        "estado": "Charlie Launch Intelligence activo"
+        "estado":
+        "Charlie Launch Intelligence activo"
     }
+
+
+
+
+
+
+
+@app.get("/recomendar")
+def recomendar_lanzamiento(
+    excluir: str = None
+):
+
+
+    token = scanner.recomendar(
+        excluir
+    )
+
+
+    return {
+
+        "recomendacion":
+        token
+
+    }
+
+
+
+
 
 
 
 @app.get("/ranking")
 def ranking():
 
-    return scanner.escanear()
+
+    tokens = scanner.escanear_mercado()
+
+
+    for token in tokens:
+
+        token["score"] = scanner.analizar_score(
+            token
+        )
+
+
+    tokens.sort(
+        key=lambda x:x["score"],
+        reverse=True
+    )
+
+
+    return tokens
 
 
 
-@app.get("/recomendar")
-def recomendar_lanzamiento():
 
-    token = scanner.recomendar()
+
+
+
+
+@app.get("/analizar/{ticker}")
+def analizar_token(
+    ticker:str
+):
+
+
+    tokens = scanner.escanear_mercado()
+
+
+
+    for token in tokens:
+
+
+        if token["ticker"].upper() == ticker.upper():
+
+            token["score"] = scanner.analizar_score(
+                token
+            )
+
+
+            return token
+
+
 
     return {
-        "recomendacion": token
-    }
+
+        "ticker":
+        ticker,
 
 
+        "score":
+        0,
 
-@app.get("/siguiente")
-def siguiente():
 
-    token = scanner.recomendar()
+        "mensaje":
+        "Token no encontrado"
 
-    return {
-        "recomendacion": token
     }
