@@ -1,363 +1,147 @@
 const API_URL = "https://charlie-launch-intelligence.onrender.com";
 
 
-let tokensMostrados = [];
-
-
-
-// =============================
-// ANALIZAR TOKEN
-// =============================
-
-function analizarToken(){
-
-    const ticker =
-    document.getElementById("ticker").value;
-
-
-    if(!ticker){
-
-        alert("Ingrese un ticker");
-
-        return;
-
-    }
-
-
-
-    fetch(`${API_URL}/analizar/${ticker.toUpperCase()}`)
-
-    .then(response=>response.json())
-
-    .then(data=>{
-
-        mostrarResultado(data);
-
-    })
-
-    .catch(error=>{
-
-        console.log(error);
-
-        alert("No se pudo conectar con el motor");
-
-    });
-
-
-}
-
-
-
-
-
-function mostrarResultado(data){
-
-
-    document.getElementById("resultado").innerHTML = crearCardToken(data);
-
-
-}
-
-
-
-
-
-
-// =============================
-// RECOMENDACION EN TIEMPO REAL
-// =============================
-
-
 function recomendarLanzamiento(){
 
+    fetch(`${API_URL}/recomendar`)
+    .then(response => response.json())
+    .then(data => {
 
-    fetch(`${API_URL}/recomendar?t=${Date.now()}`)
-
-
-    .then(response=>response.json())
-
-
-    .then(data=>{
-
-
-        let token = data.recomendacion;
-
-
-
-        if(!token){
-
-            mostrarSinResultado();
-
-            return;
-
-        }
-
-
-
-        // evitar repetidos
-
-        if(tokensMostrados.includes(token.mint)){
-
-
-            buscarOtra();
-
-
-            return;
-
-        }
-
-
-
-        tokensMostrados.push(token.mint);
-
-
-
-        mostrarRecomendacion(token);
-
-
-
-    })
-
-
-    .catch(error=>{
-
-
-        console.log(error);
-
-
-        alert(
-            "Error buscando oportunidad"
+        mostrarRecomendacion(
+            data.recomendacion
         );
 
+    })
+    .catch(error => {
+
+        console.log(error);
+        alert("Error conectando con el motor");
 
     });
 
-
 }
 
-
-
-
-
-
-// =============================
-// BUSCAR OTRA MONEDA
-// =============================
-
-
-function buscarOtra(){
-
-
-    recomendarLanzamiento();
-
-
-}
-
-
-
-
-
-
-// =============================
-// MOSTRAR RECOMENDACION
-// =============================
 
 
 function mostrarRecomendacion(token){
 
 
-    const zona =
-    document.getElementById(
+    const zona = document.getElementById(
         "recomendacion"
     );
 
 
+    if(!token || token.mensaje){
 
-    zona.innerHTML = crearCardToken(token,true);
-
-
-}
-
-
-
-
-
-
-function crearCardToken(token, recomendado=false){
-
-
-    if(!token || !token.mint){
-
-        return `
-
+        zona.innerHTML = `
         <div class="card">
-
-            <h2>❌ Sin oportunidad encontrada</h2>
-
-            <p>
-            El scanner no encontró una moneda válida en este escaneo.
-            </p>
-
-
-            <button onclick="buscarOtra()">
-            🔄 Buscar Otra
-            </button>
-
-
+        ❌ Sin oportunidades
         </div>
-
         `;
 
+        return;
     }
 
 
 
-    return `
+    zona.innerHTML = `
 
     <div class="card token-card">
 
 
+        <h2>
+        🚀 Recomendación de Lanzamiento
+        </h2>
+
+
         ${
-        recomendado
+        token.imagen
         ?
-        `<h2>🚀 Recomendación de Lanzamiento</h2>`
+        `<img src="${token.imagen}" class="token-image">`
         :
         ""
         }
 
 
 
-        <img
-
-        src="${token.imagen || 'https://placehold.co/200'}"
-
-        class="token-image"
-
-        >
-
-
-
         <h1>
-
-        ${token.nombre || "Token"}
-
-        $${token.ticker || ""}
-
+        ${token.nombre}
+        $${token.ticker}
         </h1>
 
 
-
-
         <h2>
-
-        Score ${token.score || 0}/100
-
+        Score ${token.score}/100
         </h2>
 
 
+        <p>
+        Meta: ${token.meta}
+        </p>
 
 
         <p>
-
         CA:
-
         ${token.mint}
-
         </p>
 
 
-
-
         <p>
-
         Volumen 24H:
-
-        $${token.volumen || 0}
-
+        $${token.volumen24h}
         </p>
-
-
 
 
         <p>
-
         Liquidez:
-
-        $${token.liquidez || 0}
-
+        $${token.liquidez}
         </p>
 
 
 
-
-        <div class="buttons">
-
-
-            <button onclick="copiarCA('${token.mint}')">
-
-            📋 Copiar CA
-
-            </button>
+        <button onclick="copiarCA('${token.mint}')">
+        📋 Copiar CA
+        </button>
 
 
 
-            <button onclick="abrirLink('${token.original}')">
-
-            🚀 Abrir Original
-
-            </button>
+        <button onclick="abrirLink('https://pump.fun/${token.mint}')">
+        🚀 Abrir Original
+        </button>
 
 
 
-            <button onclick="buscarOtra()">
-
-            🔄 Buscar Otra
-
-            </button>
+        <button onclick="buscarOtra()">
+        🔄 Buscar Otra
+        </button>
 
 
 
-            ${
-            token.x
-            ?
-            `
-
-            <button onclick="abrirLink('${token.x}')">
-
-            𝕏 Ver X
-
-            </button>
-
-            `
-            :
-            ""
-            }
+        ${
+        token.x
+        ?
+        `<button onclick="abrirLink('${token.x}')">
+        𝕏 Ver X
+        </button>`
+        :
+        ""
+        }
 
 
 
-            ${
-            token.web
-            ?
-            `
-
-            <button onclick="abrirLink('${token.web}')">
-
-            🌐 Ver Web
-
-            </button>
-
-            `
-            :
-            ""
-            }
-
-
-        </div>
+        ${
+        token.web
+        ?
+        `<button onclick="abrirLink('${token.web}')">
+        🌐 Ver Web
+        </button>`
+        :
+        ""
+        }
 
 
 
     </div>
-
 
     `;
 
@@ -367,149 +151,33 @@ function crearCardToken(token, recomendado=false){
 
 
 
-${
-token.web ?
+function buscarOtra(){
 
-`
-
-<button onclick="abrirLink('${token.web}')">
-
-🌐 Ver Web
-
-</button>
-
-`
-
-:''
+    recomendarLanzamiento();
 
 }
-
-
-
-</div>
-
-
-
-</div>
-
-
-`;
-
-}
-
-
-
-
-
-
-
-// =============================
-// RANKING
-// =============================
-
-
-function actualizarRanking(){
-
-
-fetch(`${API_URL}/ranking?t=${Date.now()}`)
-
-
-.then(response=>response.json())
-
-
-.then(data=>{
-
-
-let html="";
-
-
-data.forEach(token=>{
-
-
-html += crearCardToken(token);
-
-
-});
-
-
-
-document.getElementById("ranking").innerHTML = html;
-
-
-
-})
-
-.catch(error=>{
-
-
-console.log(error);
-
-
-});
-
-}
-
-
-
-
-
-
-// =============================
-// UTILIDADES
-// =============================
-
-
-function copiarCA(ca){
-
-
-navigator.clipboard.writeText(ca);
-
-
-alert("CA copiado");
-
-
-}
-
-
 
 
 
 function abrirLink(url){
 
-
-if(url){
-
-window.open(url,"_blank");
-
-}
-
+    window.open(
+        url,
+        "_blank"
+    );
 
 }
 
 
 
+function copiarCA(ca){
 
-function mostrarSinResultado(){
+    navigator.clipboard.writeText(
+        ca
+    );
 
-
-document.getElementById("recomendacion").innerHTML=
-
-`
-
-<div class="card">
-
-<h2>
-❌ No se encontraron oportunidades
-</h2>
-
-<button onclick="buscarOtra()">
-
-🔄 Intentar nuevamente
-
-</button>
-
-</div>
-
-`;
+    alert(
+        "CA copiado"
+    );
 
 }
